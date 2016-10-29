@@ -14,30 +14,21 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <activity android:name=".MainActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-
-        <activity android:name=".gamestarting.GameStartingActivity" >
+        <activity-alias
+            android:name=".EntryPointActivity"
+            android:targetActivity=".gamestarting.GameStartingActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
+        </activity-alias>
+
+        <activity android:name=".MainActivity" />
+        <activity android:name=".gamestarting.GameStartingActivity" />
 
         <activity
             android:name=".gameloop.GameLoopActivity"
-            android:theme="@style/AppTheme.Fullscreen">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:theme="@style/AppTheme.Fullscreen" />
 
     </application>
 
