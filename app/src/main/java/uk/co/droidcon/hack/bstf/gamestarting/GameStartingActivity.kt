@@ -55,13 +55,17 @@ class GameStartingActivity : AppCompatActivity() {
 
         adapter.setPlayers(gameManager.gameSession.players)
 
+        if (gameManager.isSynced && gameManager.gameSession.isStarted) {
+            Toast.makeText(this, "Game already started, sorry :(", Toast.LENGTH_SHORT).show()
+            return
+        }
+
         playersSubscription = gameManager.observePlayers()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
-                    Log.d("Observable", "new players")
                     adapter.setPlayers(it)
-                    if (it.size > 1 && it.all { it.isReady }) {
+                    if (!gameManager.gameSession.isStarted && it.size > 1 && it.all { it.isReady }) {
                         openActiveGame()
                     }
                 })
@@ -70,7 +74,7 @@ class GameStartingActivity : AppCompatActivity() {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
-                    if (gameManager.me == null) {
+                    if (gameManager.me == null && !gameManager.gameSession.isStarted) {
                         assignProfile()
                         adapter.me = gameManager.me
                         isReadyButton.visibility = View.VISIBLE

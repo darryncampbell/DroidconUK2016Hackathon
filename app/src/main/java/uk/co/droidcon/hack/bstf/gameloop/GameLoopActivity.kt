@@ -35,6 +35,8 @@ class GameLoopActivity : AppCompatActivity() {
         recycler.adapter = adapter
         recycler.itemAnimator = DefaultItemAnimator()
 
+        gameManager.gameStarted()
+
         buttonShoot.setOnClickListener { view ->
             val manager = BstfComponent.getBstfGameManager()
             val otherPlayers = manager.otherPlayers()

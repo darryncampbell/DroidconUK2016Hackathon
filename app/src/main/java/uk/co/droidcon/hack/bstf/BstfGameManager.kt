@@ -18,7 +18,7 @@ class BstfGameManager(database: FirebaseDatabase, gameId: Int) : ValueEventListe
     var gameSession: GameSession
     var me: Player? = null
 
-    private var isSynced: Boolean = false
+    var isSynced: Boolean = false
     private val readyObservable: BehaviorSubject<Boolean> = BehaviorSubject.create()
     private val playersSubject: PublishSubject<ArrayList<Player>> = PublishSubject.create()
 
@@ -135,5 +135,10 @@ class BstfGameManager(database: FirebaseDatabase, gameId: Int) : ValueEventListe
                 event.target == player
             })
         }
+    }
+
+    fun gameStarted() {
+        gameSession.isStarted = true
+        databaseReference.setValue(gameSession)
     }
 }

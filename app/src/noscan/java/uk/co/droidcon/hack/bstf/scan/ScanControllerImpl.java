@@ -15,6 +15,11 @@ public class ScanControllerImpl implements ScanController {
     }
 
     @Override
+    public Observable observeScanTrigger() {
+        return Observable.empty();
+    }
+
+    @Override
     public Observable<String> observeScanResults() {
         return Observable.just("no-scan");
     }
