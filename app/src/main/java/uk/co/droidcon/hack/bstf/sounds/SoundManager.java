@@ -5,9 +5,9 @@ import android.media.AudioManager;
 import android.media.SoundPool;
 import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
-
 import java.lang.annotation.Retention;
 
+import timber.log.Timber;
 import uk.co.droidcon.hack.bstf.R;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
@@ -22,7 +22,7 @@ public class SoundManager {
     @Retention(SOURCE)
     @IntDef({PISTOL, RELOAD})
     public @interface Sound {}
-    public static final int UNDEFINED = -1;
+    private static final int UNDEFINED = -1;
     public static final int PISTOL = 0;
     public static final int RELOAD = 1;
 
@@ -45,7 +45,7 @@ public class SoundManager {
     public void playSound(@Sound final int soundType) {
         final int soundId = getSoundId(soundType);
         if (soundId != UNDEFINED) {
-            soundPool.play(soundId, 1.0f, 1.0f, 1, 0, 0);
+            if (soundPool.play(soundId, 1.0f, 1.0f, 1, 0, 0) == 0 ) Timber.e("SOUND WITH ID %d didn\'t play", soundId);
         }
     }
 

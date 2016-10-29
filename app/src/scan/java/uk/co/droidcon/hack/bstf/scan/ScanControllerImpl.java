@@ -4,7 +4,6 @@ import android.content.Context;
 
 import com.symbol.emdk.EMDKManager;
 import com.symbol.emdk.EMDKResults;
-import com.symbol.emdk.VersionManager;
 import com.symbol.emdk.barcode.BarcodeManager;
 import com.symbol.emdk.barcode.ScanDataCollection;
 import com.symbol.emdk.barcode.Scanner;

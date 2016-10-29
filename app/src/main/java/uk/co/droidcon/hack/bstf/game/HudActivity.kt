@@ -4,7 +4,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.media.MediaPlayer
 import android.os.Bundle
 import android.support.v4.content.LocalBroadcastManager
 import android.support.v7.app.AppCompatActivity
@@ -32,7 +31,7 @@ open class HudActivity : AppCompatActivity() {
     protected var soundManager: SoundManager? = null
     protected val reloadReceiver = ReloadReceiver()
 
-    lateinit internal var scanController: ScanController
+    internal var scanController: ScanController? = null
 
     val text: TextView by bindView(R.id.info)
     val ammoCount: TextView by bindView(R.id.ammo_count)
@@ -54,16 +53,16 @@ open class HudActivity : AppCompatActivity() {
 
     open fun setupScanController() {
         scanController = ScanControllerImpl()
-        scanController.onCreate(this)
+        scanController!!.onCreate(this)
 
-        scanController.observeScanTrigger().
+        scanController!!.observeScanTrigger().
                 subscribeOn(Schedulers.computation()).
                 observeOn(AndroidSchedulers.mainThread()).
                 subscribe { shoot() }
     }
 
     override fun onDestroy() {
-        scanController.onDestroy()
+        scanController!!.onDestroy()
         super.onDestroy()
     }
 
@@ -82,7 +81,7 @@ open class HudActivity : AppCompatActivity() {
         count--
         if (count <= 0) {
             gunEmpty = true
-            scanController.setEnabled(false)
+            scanController!!.setEnabled(false)
         } else {
             // TODO: improve with soundPool
 //            MediaPlayer.create(this, R.raw.pistol).start()
@@ -98,9 +97,13 @@ open class HudActivity : AppCompatActivity() {
     }
 
     private fun gunReloaded() {
+        soundManager!!.playSound(SoundManager.RELOAD)
+
         count = AMMO_COUNT
         gunEmpty = false
-        scanController.setEnabled(true)
+        if (scanController != null) {
+            scanController!!.setEnabled(true)
+        }
         updateUi()
     }
 
