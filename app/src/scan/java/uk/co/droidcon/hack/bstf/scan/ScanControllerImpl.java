@@ -126,6 +126,8 @@ public class ScanControllerImpl implements ScanController, EMDKManager.EMDKListe
     }
 
     private void configure() {
+        if (scanner == null) return;
+        
         try {
             final ScannerConfig config = scanner.getConfig();
 

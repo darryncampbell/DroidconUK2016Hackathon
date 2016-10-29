@@ -53,7 +53,6 @@ open class HudActivity : AppCompatActivity() {
 
     open fun setupScanController() {
         scanController = ScanControllerImpl.getInstance()
-
         scanController!!.observeScanTrigger().
                 subscribeOn(Schedulers.computation()).
                 observeOn(AndroidSchedulers.mainThread()).
@@ -70,12 +69,12 @@ open class HudActivity : AppCompatActivity() {
 
     protected open fun setupShooting() {
         localBroadcastManager = LocalBroadcastManager.getInstance(this)
-        localBroadcastManager!!.registerReceiver(reloadReceiver, IntentFilter(BatteryStateReceiver.ACTION_RELOAD))
+        localBroadcastManager?.registerReceiver(reloadReceiver, IntentFilter(BatteryStateReceiver.ACTION_RELOAD))
     }
 
     protected fun shoot() {
         if (gunEmpty) {
-            soundManager!!.playSound(SoundManager.EMPTY_POP)
+            soundManager?.playSound(SoundManager.EMPTY_POP)
             // TODO: animate ammo
             return
         }
@@ -83,9 +82,9 @@ open class HudActivity : AppCompatActivity() {
         count--
         if (count <= 0) {
             gunEmpty = true
-            scanController!!.setEnabled(false)
+            scanController?.setEnabled(false)
         } else {
-            soundManager!!.playSound(SoundManager.LASER)
+            soundManager?.playSound(SoundManager.PISTOL)
         }
 
         updateUi()
@@ -99,9 +98,7 @@ open class HudActivity : AppCompatActivity() {
     private fun gunReloaded() {
         count = AMMO_COUNT
         gunEmpty = false
-        if (scanController != null) {
-            scanController!!.setEnabled(true)
-        }
+        scanController?.setEnabled(true)
         updateUi()
     }
 
