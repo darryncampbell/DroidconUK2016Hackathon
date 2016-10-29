@@ -106,15 +106,7 @@ class BstfGameManager(database: FirebaseDatabase, gameId: Int) : ValueEventListe
     }
 
     fun observePlayerState(): Observable<List<PlayerState>> {
-        return observePlayers().map { playerList ->
-            playerList.map { player ->
-                PlayerState(player, gameSession.shotsFired!!.filter { event ->
-                    event.source == player
-                }, gameSession.shotsFired!!.filter { event ->
-                    event.target == player
-                })
-            }
-        }
+        return observePlayers().map { playerList -> makePlayerStateList(playerList) }
     }
 
     fun toggleReadyState() {
@@ -128,5 +120,19 @@ class BstfGameManager(database: FirebaseDatabase, gameId: Int) : ValueEventListe
         }
 
         databaseReference.setValue(gameSession)
+    }
+
+    fun playerStateList(): List<PlayerState> {
+        return makePlayerStateList(gameSession.players!!)
+    }
+
+    private fun makePlayerStateList(playerList: ArrayList<Player>): List<PlayerState> {
+        return playerList.map { player ->
+            PlayerState(player, gameSession.shotsFired!!.filter { event ->
+                event.source == player
+            }, gameSession.shotsFired!!.filter { event ->
+                event.target == player
+            })
+        }
     }
 }

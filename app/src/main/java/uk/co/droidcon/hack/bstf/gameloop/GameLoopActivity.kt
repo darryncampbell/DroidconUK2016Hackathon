@@ -1,7 +1,6 @@
 package uk.co.droidcon.hack.bstf.gameloop
 
 import android.os.Bundle
-import android.os.PersistableBundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.DefaultItemAnimator
 import android.support.v7.widget.RecyclerView
@@ -29,6 +28,13 @@ class GameLoopActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_game_loop)
 
+        gameManager = BstfComponent.getBstfGameManager()
+        adapter = PlayerStateAdapter()
+        adapter.updateList(gameManager.playerStateList())
+
+        recycler.adapter = adapter
+        recycler.itemAnimator = DefaultItemAnimator()
+
         buttonShoot.setOnClickListener { view ->
             val manager = BstfComponent.getBstfGameManager()
             val otherPlayers = manager.otherPlayers()
@@ -46,13 +52,8 @@ class GameLoopActivity : AppCompatActivity() {
             manager.databaseReference.setValue(session)
         }
 
-        adapter = PlayerStateAdapter()
-
         val subscription = gameManager.observePlayerState().subscribe { adapter.updateList(it) }
         subscriptions.add(subscription)
-
-        recycler.adapter = adapter
-        recycler.itemAnimator = DefaultItemAnimator()
     }
 
     override fun onDestroy() {
