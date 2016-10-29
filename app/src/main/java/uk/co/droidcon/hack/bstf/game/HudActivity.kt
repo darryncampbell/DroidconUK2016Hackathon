@@ -31,7 +31,7 @@ open class HudActivity : AppCompatActivity() {
     protected var soundManager: SoundManager? = null
     protected val reloadReceiver = ReloadReceiver()
 
-    internal var scanController: ScanController? = null
+    internal var  scanController: ScanController? = null
 
     val text: TextView by bindView(R.id.info)
     val ammoCount: TextView by bindView(R.id.ammo_count)
@@ -53,7 +53,7 @@ open class HudActivity : AppCompatActivity() {
 
     open fun setupScanController() {
         scanController = ScanControllerImpl()
-        scanController!!.onCreate(this)
+        scanController?.onCreate(this)
 
         scanController!!.observeScanTrigger().
                 subscribeOn(Schedulers.computation()).
@@ -73,18 +73,18 @@ open class HudActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        scanController!!.onDestroy()
+        scanController?.onDestroy()
         super.onDestroy()
     }
 
     protected open fun setupShooting() {
         localBroadcastManager = LocalBroadcastManager.getInstance(this)
-        localBroadcastManager!!.registerReceiver(reloadReceiver, IntentFilter(BatteryStateReceiver.ACTION_RELOAD))
+        localBroadcastManager?.registerReceiver(reloadReceiver, IntentFilter(BatteryStateReceiver.ACTION_RELOAD))
     }
 
     protected fun shoot() {
         if (gunEmpty) {
-            soundManager!!.playSound(SoundManager.EMPTY_POP)
+            soundManager?.playSound(SoundManager.EMPTY_POP)
             // TODO: animate ammo
             return
         }
@@ -92,9 +92,9 @@ open class HudActivity : AppCompatActivity() {
         count--
         if (count <= 0) {
             gunEmpty = true
-            scanController!!.setEnabled(false)
+            scanController?.setEnabled(false)
         } else {
-            soundManager!!.playSound(SoundManager.PISTOL)
+            soundManager?.playSound(SoundManager.PISTOL)
         }
 
         updateUi()
@@ -108,9 +108,7 @@ open class HudActivity : AppCompatActivity() {
     private fun gunReloaded() {
         count = AMMO_COUNT
         gunEmpty = false
-        if (scanController != null) {
-            scanController!!.setEnabled(true)
-        }
+        scanController?.setEnabled(true)
         updateUi()
     }
 
