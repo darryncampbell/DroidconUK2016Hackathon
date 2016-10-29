@@ -4,6 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="uk.co.droidcon.hack.bstf">
 
+    <uses-permission android:name="android.permission.CAMERA" />
+
     <application
         android:name=".BstfApplication"
         android:allowBackup="false"
@@ -22,6 +24,23 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".reload.battery.ReloadBatteryTestActivity"
+            android:label="BSTF BatteryReload Test">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".game.HudActivity"
+            android:label="BSTF HUD Test">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>
