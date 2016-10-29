@@ -28,12 +28,15 @@ class PlayerStateAdapter : RecyclerView.Adapter<RowViewHolder>() {
                 }
 
                 override fun compare(o1: PlayerState, o2: PlayerState): Int {
-                    if (o1.player == playerMe) {
-                        return 1
-                    } else if (o2.player == playerMe) {
-                        return -1
+                    if (playerMe.name == o1.player.name) {
+                        // Always place us on top
+                        return if (o2.player.name == playerMe.name) 0 else 1
+
                     } else {
-                        return o1.player.simpleScore().compareTo(o2.player.simpleScore())
+                        return if (o2.player == playerMe) -1
+
+                        // Otherwise sort by score
+                        else o1.player.simpleScore().compareTo(o2.player.simpleScore())
                     }
                 }
             })
@@ -67,7 +70,6 @@ class PlayerStateAdapter : RecyclerView.Adapter<RowViewHolder>() {
     fun updateList(stateList: List<PlayerState>) {
         playerStateList.beginBatchedUpdates()
         try {
-            playerStateList.clear()
             playerStateList.addAll(stateList)
         } finally {
             playerStateList.endBatchedUpdates()
