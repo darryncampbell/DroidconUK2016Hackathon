@@ -1,11 +1,16 @@
-package uk.co.droidcon.hack.bstf
+package uk.co.droidcon.hack.bstf.gamestarting
 
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.Toolbar
 import android.widget.ImageView
 import android.widget.TextView
 import butterknife.bindView
+import uk.co.droidcon.hack.bstf.BstfComponent
+import uk.co.droidcon.hack.bstf.BstfGameManager
+import uk.co.droidcon.hack.bstf.R
 import uk.co.droidcon.hack.bstf.models.Player
 import uk.co.droidcon.hack.bstf.models.Profile
 import java.util.*
@@ -14,10 +19,10 @@ class GameStartingActivity : AppCompatActivity() {
 
     val toolbar: Toolbar by bindView(R.id.toolbar)
     val gameIdTextView: TextView by bindView(R.id.game_starting_game_id)
-    val meNameTextView: TextView by bindView(R.id.game_starting_me_name)
-    val meAvatarImageView: ImageView by bindView(R.id.game_starting_me_avatar)
+    val playersRecyclerView: RecyclerView by bindView(R.id.game_starting_players)
 
     lateinit var gameManager: BstfGameManager
+    lateinit var adapter: GameStartingPlayersAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,14 +36,11 @@ class GameStartingActivity : AppCompatActivity() {
             assignProfile()
         }
 
-        showMe()
-    }
+        adapter = GameStartingPlayersAdapter()
+        playersRecyclerView.adapter = adapter
+        playersRecyclerView.layoutManager = LinearLayoutManager(this)
 
-    private fun showMe() {
-        if (gameManager.me == null) return
-        val profile = Profile.getProfileForId(gameManager.me?.name.toString())
-        meNameTextView.text = profile.id
-        meAvatarImageView.setImageResource(profile.avatarId)
+        adapter.setPlayers(gameManager.gameSession.players)
     }
 
     fun assignProfile() {
