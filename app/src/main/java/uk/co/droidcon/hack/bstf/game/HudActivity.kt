@@ -1,61 +1,84 @@
-@file:Suppress("DEPRECATION")
-
 package uk.co.droidcon.hack.bstf.game
 
-import android.hardware.Camera
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.media.MediaPlayer
 import android.os.Bundle
+import android.support.v4.content.LocalBroadcastManager
 import android.support.v7.app.AppCompatActivity
-import android.util.Log
-import android.view.SurfaceHolder
-import android.view.SurfaceView
+import android.view.View
+import android.widget.TextView
+import butterknife.bindView
 import uk.co.droidcon.hack.bstf.R
+import uk.co.droidcon.hack.bstf.reload.battery.BatteryStateReceiver
+import uk.co.droidcon.hack.bstf.scan.ScanController
 
-class HudActivity : AppCompatActivity(), SurfaceHolder.Callback {
+open class HudActivity : AppCompatActivity() {
 
-    lateinit internal var mCamera: Camera
-    lateinit internal var mPreview: SurfaceView
+    companion object {
+        var AMMO_COUNT = 15
+    }
+
+    protected var count = AMMO_COUNT
+    protected var gunEmpty = false
+
+    protected var localBroadcastManager: LocalBroadcastManager? = null
+    internal var mediaPlayer: MediaPlayer? = null
+    protected val reloadReceiver = ReloadReceiver()
+
+    lateinit internal var scanController: ScanController
+
+    val text: TextView by bindView(R.id.info)
+    val ammoCount: TextView by bindView(R.id.ammo_count)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.hud)
 
-        mPreview = findViewById(R.id.preview) as SurfaceView
-        mPreview.holder.addCallback(this)
-        mPreview.holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS)
+        setupScanController()
 
-        mCamera = Camera.open()
-        mCamera.setDisplayOrientation(90)
+        setupShooting()
+
+        // TODO: go fullscreen
+
+        updateUi()
     }
 
-    override fun onPause() {
-        super.onPause()
-        mCamera.stopPreview()
+    open fun setupScanController() {
+        scanController = ScanController()
+        scanController.onCreate(this)
     }
 
     override fun onDestroy() {
+        scanController.onDestroy()
         super.onDestroy()
-        mCamera.release()
     }
 
-    override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
-        val params = mCamera.getParameters()
-        val sizes = params.getSupportedPreviewSizes()
-        val selected = sizes.get(0)
-        params.setPreviewSize(selected.width, selected.height)
-        mCamera.setParameters(params)
-
-        mCamera.startPreview()
+    protected open fun setupShooting() {
+        localBroadcastManager = LocalBroadcastManager.getInstance(this)
+        localBroadcastManager!!.registerReceiver(reloadReceiver, IntentFilter(BatteryStateReceiver.ACTION_RELOAD))
     }
 
-    override fun surfaceCreated(holder: SurfaceHolder) {
-        try {
-            mCamera.setPreviewDisplay(mPreview.holder)
-        } catch (e: Exception) {
-            e.printStackTrace()
+    protected fun shoot() {
+        MediaPlayer.create(this, R.raw.pistol).start()
+    }
+
+    protected fun updateUi() {
+        ammoCount.text = "" + count
+        text.visibility = if(gunEmpty) View.VISIBLE else View.GONE
+    }
+
+    private fun gunReloaded() {
+        count = AMMO_COUNT
+        gunEmpty = false
+        updateUi()
+    }
+
+    inner class ReloadReceiver() : BroadcastReceiver() {
+        override fun onReceive(p0: Context?, p1: Intent?) {
+            gunReloaded()
         }
-    }
-
-    override fun surfaceDestroyed(holder: SurfaceHolder) {
-        Log.i("PREVIEW", "surfaceDestroyed")
     }
 }

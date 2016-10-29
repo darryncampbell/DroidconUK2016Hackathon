@@ -55,8 +55,7 @@ dependencies {
     compile "com.android.support:design:${supportVersion}"
     compile "com.android.support:appcompat-v7:${supportVersion}"
 
-    compile "com.jakewharton:butterknife:${butterknifeVersion}"
-    apt "com.jakewharton:butterknife-compiler:${butterknifeVersion}"
+    compile 'com.jakewharton:kotterknife:0.1.0-SNAPSHOT'
 
     compile "io.reactivex:rxandroid:$rxandroidVersion"
     compile "io.reactivex:rxjava:$rxjavaVersion"
