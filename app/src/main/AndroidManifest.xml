@@ -57,7 +57,8 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".game.HudActivityWithPreview"
+        <activity
+            android:name=".game.HudActivityWithPreview"
             android:label="BSTF AR">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -69,6 +70,15 @@
         <activity
             android:name=".BluetoothTapActivity"
             android:label="BSTF BluetoothTap">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".gamestarting.GameStarterActivity"
+            android:label="BSTF Starter">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
