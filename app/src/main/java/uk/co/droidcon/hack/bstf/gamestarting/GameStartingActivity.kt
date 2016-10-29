@@ -101,7 +101,7 @@ class GameStartingActivity : AppCompatActivity() {
 
         if (gameManager.gameSession.players != null) {
             for (player in gameManager.gameSession.players!!) {
-                val profile = Profile.getProfileForId(player.name)
+                val profile = Profile.getProfileForName(player.name)
                 availableProfiles.remove(profile)
             }
         }
@@ -116,7 +116,7 @@ class GameStartingActivity : AppCompatActivity() {
         val randomIndex = random.nextInt(availableProfiles.size)
         val profile = availableProfiles[randomIndex]
 
-        gameManager.signUp(Player(profile.id))
+        gameManager.signUp(Player(profile.superHeroName))
     }
 
     override fun onBackPressed() {

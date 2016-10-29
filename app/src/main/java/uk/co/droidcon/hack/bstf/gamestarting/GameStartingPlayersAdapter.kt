@@ -29,7 +29,7 @@ class GameStartingPlayersAdapter : RecyclerView.Adapter<GameStartingPlayersAdapt
     override fun onBindViewHolder(holder: GameStartingPlayersViewHolder, position: Int) {
         Log.d("Adapter", "onBindViewHolder")
         val player = players[position]
-        val profile = Profile.getProfileForId(player.name)
+        val profile = Profile.getProfileForName(player.name)
 
         if (player.name == me?.name) {
             holder.nameView.text = player.name + " (me)"
