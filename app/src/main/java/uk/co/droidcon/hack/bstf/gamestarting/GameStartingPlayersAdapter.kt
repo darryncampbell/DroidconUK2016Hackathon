@@ -2,7 +2,6 @@ package uk.co.droidcon.hack.bstf.gamestarting
 
 import android.support.v4.content.ContextCompat
 import android.support.v4.graphics.drawable.DrawableCompat
-import android.support.v7.util.DiffUtil
 import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.LayoutInflater
@@ -10,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import com.bumptech.glide.Glide
 import uk.co.droidcon.hack.bstf.R
 import uk.co.droidcon.hack.bstf.models.Player
 import uk.co.droidcon.hack.bstf.models.Profile
@@ -36,7 +36,7 @@ class GameStartingPlayersAdapter : RecyclerView.Adapter<GameStartingPlayersAdapt
             holder.nameView.text = player.name
         }
 
-        holder.avatarView.setImageResource(profile.avatarId)
+        Glide.with(holder.itemView.context).load(profile.avatarId).into(holder.avatarView)
         holder.isReadyView.setImageResource(if (player.isReady) R.drawable.checked else R.drawable.unchecked)
         val tintColor = if (player.isReady) R.color.colorPrimary else android.R.color.darker_gray
         DrawableCompat.setTint(holder.isReadyView.drawable, ContextCompat.getColor(holder.itemView.context, tintColor))
