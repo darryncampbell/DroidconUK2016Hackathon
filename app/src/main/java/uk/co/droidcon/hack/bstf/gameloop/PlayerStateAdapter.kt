@@ -44,7 +44,7 @@ class PlayerStateAdapter : RecyclerView.Adapter<RowViewHolder>() {
     override fun onBindViewHolder(holder: RowViewHolder, position: Int) {
 
         val state = playerStateList.get(position)
-        val profile = Profile.getProfileForId(state.player.name)
+        val profile = Profile.getProfileForName(state.player.name)
         val summaryText = holder.summaryView.context.getString(R.string.text__player_state_summary,
                 state.player.killCount(), state.player.deathCount())
         val relativeSummaryText = holder.summaryView.context.getString(R.string.text__player_state_relative_summary,
