@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
@@ -58,6 +59,7 @@ class GameStartingActivity : AppCompatActivity() {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
+                    Log.d("Observable", "new players")
                     adapter.setPlayers(it)
                     if (it.size > 1 && it.all { it.isReady }) {
                         openActiveGame()
@@ -84,7 +86,9 @@ class GameStartingActivity : AppCompatActivity() {
     }
 
     private fun openActiveGame() {
-        startActivity(Intent(this, GameLoopActivity::class.java))
+        val intent = Intent(this, GameLoopActivity::class.java)
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        startActivity(intent)
     }
 
     fun assignProfile() {

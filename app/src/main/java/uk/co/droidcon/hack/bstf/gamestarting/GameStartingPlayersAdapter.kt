@@ -4,6 +4,7 @@ import android.support.v4.content.ContextCompat
 import android.support.v4.graphics.drawable.DrawableCompat
 import android.support.v7.util.DiffUtil
 import android.support.v7.widget.RecyclerView
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -25,6 +26,7 @@ class GameStartingPlayersAdapter : RecyclerView.Adapter<GameStartingPlayersAdapt
     }
 
     override fun onBindViewHolder(holder: GameStartingPlayersViewHolder, position: Int) {
+        Log.d("Adapter", "onBindViewHolder")
         val player = players[position]
         val profile = Profile.getProfileForId(player.name)
 
