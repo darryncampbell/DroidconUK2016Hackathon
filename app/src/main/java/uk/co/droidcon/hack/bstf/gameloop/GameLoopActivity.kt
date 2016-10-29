@@ -51,13 +51,16 @@ class GameLoopActivity : AppCompatActivity() {
             session.shotsFired!!.add(ShotEvent(criminal, manager.me))
             manager.databaseReference.setValue(session)
         }
+    }
 
+    override fun onResume() {
+        super.onResume()
         val subscription = gameManager.observePlayerState().subscribe { adapter.updateList(it) }
         subscriptions.add(subscription)
     }
 
-    override fun onDestroy() {
+    override fun onPause() {
+        super.onPause()
         subscriptions.clear()
-        super.onDestroy()
     }
 }
