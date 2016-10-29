@@ -56,14 +56,14 @@ public class ScanControllerImpl implements ScanController, EMDKManager.EMDKListe
     public void onPause() {
         Timber.v("onPause");
         destroyScanner();
-        releaseEmdkManager(true);
+        releaseEmdkManager();
     }
 
     @Override
     public void onDestroy() {
         Timber.v("onDestroy");
         destroyScanner();
-        releaseEmdkManager(false);
+        releaseEmdkManager();
     }
 
     @Override
@@ -138,7 +138,10 @@ public class ScanControllerImpl implements ScanController, EMDKManager.EMDKListe
 
             config.scanParams.decodeHapticFeedback = true;
             config.scanParams.decodeLEDTime = 1000;
-            config.readerParams.readerSpecific.imagerSpecific.beamTimer = 500;
+            config.readerParams.readerSpecific.imagerSpecific.beamTimer = 300;
+            config.readerParams.readerSpecific.laserSpecific.powerMode = ScannerConfig.PowerMode.HIGH;
+            config.readerParams.readerSpecific.imagerSpecific.aimingPattern = ScannerConfig.AimingPattern.ON;
+
             config.readerParams.readerSpecific.imagerSpecific.illuminationMode = ScannerConfig.IlluminationMode.ON;
             config.readerParams.readerSpecific.imagerSpecific.illuminationBrightness = 10;
 
@@ -151,7 +154,7 @@ public class ScanControllerImpl implements ScanController, EMDKManager.EMDKListe
     @Override
     public void onClosed() {
         Timber.v("onClosed");
-        releaseEmdkManager(false);
+        releaseEmdkManager();
     }
 
     private void destroyScanner() {
@@ -175,7 +178,7 @@ public class ScanControllerImpl implements ScanController, EMDKManager.EMDKListe
         }
     }
 
-    private void releaseEmdkManager(boolean justBarcodeManager) {
+    private void releaseEmdkManager() {
         Timber.v("releaseEmdkManager: %s", emdkManager);
         if (barcodeManager != null) {
             barcodeManager.removeConnectionListener(this);
@@ -183,12 +186,8 @@ public class ScanControllerImpl implements ScanController, EMDKManager.EMDKListe
         }
 
         if (emdkManager != null) {
-            if (justBarcodeManager) {
-                emdkManager.release(FEATURE_TYPE.BARCODE);
-            } else {
-                emdkManager.release();
-                emdkManager = null;
-            }
+            emdkManager.release();
+            emdkManager = null;
         }
     }
 
