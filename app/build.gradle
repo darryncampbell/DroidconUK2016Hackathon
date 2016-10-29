@@ -1,6 +1,5 @@
 apply plugin: 'com.android.application'
 apply plugin: 'com.neenbedankt.android-apt'
-apply plugin: 'groovyx.android'
 apply plugin: 'kotlin-android'
 
 android {
@@ -8,7 +7,7 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
 
     defaultConfig {
-        applicationId 'de.telekom.puls.prototype'
+        applicationId 'uk.co.droidcon.hack.bstf'
         minSdkVersion 19
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
@@ -31,8 +30,7 @@ android {
 
 afterEvaluate {
     android.sourceSets.all { sourceSet ->
-        if (!sourceSet.name.startsWith("test"))
-        {
+        if (!sourceSet.name.startsWith("test")) {
             sourceSet.kotlin.setSrcDirs([])
         }
     }
@@ -55,4 +53,7 @@ dependencies {
 
     compile "io.reactivex:rxandroid:$rxandroidVersion"
     compile "io.reactivex:rxjava:$rxjavaVersion"
+
+    compile "com.jakewharton.timber:timber:${timberVersion}"
+    provided fileTree(include: ['com.symbol.emdk.jar'], dir: '../libs')
 }
