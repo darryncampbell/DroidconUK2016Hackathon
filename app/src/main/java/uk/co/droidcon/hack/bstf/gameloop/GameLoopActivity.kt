@@ -114,7 +114,6 @@ class GameLoopActivity : AppCompatActivity() {
             gunEmpty = true
             scanController.setEnabled(false)
         } else {
-            // TODO: improve with soundPool
             soundManager.playSound(SoundManager.PISTOL)
         }
 
@@ -122,8 +121,6 @@ class GameLoopActivity : AppCompatActivity() {
     }
 
     private fun gunReloaded() {
-        soundManager.playSound(SoundManager.RELOAD)
-
         count = AMMO_COUNT
         gunEmpty = false
         scanController.setEnabled(true)

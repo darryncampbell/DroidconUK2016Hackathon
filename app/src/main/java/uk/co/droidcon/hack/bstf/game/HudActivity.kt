@@ -106,8 +106,6 @@ open class HudActivity : AppCompatActivity() {
     }
 
     private fun gunReloaded() {
-        soundManager!!.playSound(SoundManager.RELOAD)
-
         count = AMMO_COUNT
         gunEmpty = false
         if (scanController != null) {
