@@ -31,7 +31,7 @@ open class HudActivity : AppCompatActivity() {
     protected var soundManager: SoundManager? = null
     protected val reloadReceiver = ReloadReceiver()
 
-    internal var  scanController: ScanController? = null
+    internal var scanController: ScanController? = null
 
     val text: TextView by bindView(R.id.info)
     val ammoCount: TextView by bindView(R.id.ammo_count)
@@ -52,29 +52,19 @@ open class HudActivity : AppCompatActivity() {
     }
 
     open fun setupScanController() {
-        scanController = ScanControllerImpl()
-        scanController?.onCreate(this)
-
+        scanController = ScanControllerImpl.getInstance()
         scanController!!.observeScanTrigger().
                 subscribeOn(Schedulers.computation()).
                 observeOn(AndroidSchedulers.mainThread()).
                 subscribe { shoot() }
     }
 
-
     override fun onResume() {
-        scanController?.onResume()
         super.onResume()
     }
 
     override fun onPause() {
-        scanController?.onPause()
         super.onPause()
-    }
-
-    override fun onDestroy() {
-        scanController?.onDestroy()
-        super.onDestroy()
     }
 
     protected open fun setupShooting() {

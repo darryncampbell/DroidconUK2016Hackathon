@@ -66,15 +66,13 @@ class GameLoopActivity : AppCompatActivity() {
         recycler.itemAnimator = DefaultItemAnimator()
 
         gameManager.gameStarted()
-        scanController = ScanControllerImpl()
-        scanController.onCreate(this)
+        scanController = ScanControllerImpl.getInstance()
 
         updateTopUi()
     }
 
     override fun onResume() {
         super.onResume()
-        scanController.onResume()
         val subscription = gameManager.observePlayerState()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe {
@@ -150,14 +148,8 @@ class GameLoopActivity : AppCompatActivity() {
     }
 
     override fun onPause() {
-        scanController.onPause()
         subscriptions.clear()
         super.onPause()
-    }
-
-    override fun onDestroy() {
-        scanController.onDestroy()
-        super.onDestroy()
     }
 
     inner class ReloadReceiver() : BroadcastReceiver() {

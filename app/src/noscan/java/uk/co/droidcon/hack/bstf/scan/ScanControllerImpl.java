@@ -3,23 +3,24 @@ package uk.co.droidcon.hack.bstf.scan;
 import android.content.Context;
 
 import rx.Observable;
+import timber.log.Timber;
 
 public class ScanControllerImpl implements ScanController {
 
-    @Override
-    public void onCreate(Context context) {
+    private static final ScanControllerImpl INSTANCE = new ScanControllerImpl();
+
+    public static ScanControllerImpl getInstance() {
+        return INSTANCE;
     }
 
     @Override
-    public void onResume() {
+    public void onResume(Context context) {
+        Timber.v("onResume");
     }
 
     @Override
     public void onPause() {
-    }
-
-    @Override
-    public void onDestroy() {
+        Timber.v("onPause");
     }
 
     @Override
