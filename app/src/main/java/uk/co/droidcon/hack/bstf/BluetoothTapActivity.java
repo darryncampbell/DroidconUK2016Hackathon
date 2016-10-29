@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
@@ -15,11 +16,13 @@ public class BluetoothTapActivity extends AppCompatActivity {
 
     ImageView qrCodeView;
     private BluetoothTapController bluetoothController;
+    private TextView textView;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bluetooth_tap);
+        textView = (TextView) findViewById(R.id.text_view);
         qrCodeView = (ImageView) findViewById(R.id.start_game_qr);
 
         bluetoothController = new BluetoothTapController(this);
@@ -45,6 +48,7 @@ public class BluetoothTapActivity extends AppCompatActivity {
                 .subscribe(new Action1<Boolean>() {
                     @Override
                     public void call(Boolean tapped) {
+                        textView.setText(tapped ? "BEACON TOUCHED" : "Ready to detect BluetoothTap Beacon touches");
                         qrCodeView.setVisibility(tapped ? View.VISIBLE : View.INVISIBLE);
                     }
                 });
