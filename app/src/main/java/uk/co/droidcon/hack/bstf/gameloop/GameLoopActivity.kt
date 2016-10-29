@@ -72,9 +72,7 @@ class GameLoopActivity : AppCompatActivity() {
         recycler.itemAnimator = DefaultItemAnimator()
 
         gameManager.gameStarted()
-
-        scanController = ScanControllerImpl()
-        scanController.onCreate(this)
+        scanController = ScanControllerImpl.getInstance()
 
         nfcItemController = NfcItemController()
         nfcItemController.setupNfcAdapter(this)
@@ -85,7 +83,6 @@ class GameLoopActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        scanController.onResume()
         nfcItemController.onResume(this)
         val subscription = gameManager.observePlayerState()
                 .observeOn(AndroidSchedulers.mainThread())
@@ -196,15 +193,9 @@ class GameLoopActivity : AppCompatActivity() {
     }
 
     override fun onPause() {
-        scanController.onPause()
         nfcItemController.onPause(this)
         subscriptions.clear()
         super.onPause()
-    }
-
-    override fun onDestroy() {
-        scanController.onDestroy()
-        super.onDestroy()
     }
 
     override fun onNewIntent(intent: Intent) {

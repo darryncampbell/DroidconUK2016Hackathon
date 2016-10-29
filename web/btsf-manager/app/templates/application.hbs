@@ -1,0 +1,19 @@
+<div class="container">
+    <h1>Blue Scanner Tagon Fire Manager</h1>
+
+    <section>
+        <div>Game Session {{model.id}}</div>
+        <div>Has the game started yet? {{model.started}}</div>
+
+      {{#md-collection content=model.players as |player|}}
+          <div class='collection-item avatar'>
+              <div class="circle green mdi-action-favorite">
+                  <img style="height: 42px" src="{{player.avatarUrl}}" align="middle">
+              </div>
+
+              <p>{{player.name}}</p>
+              <p>is {{#if player.ready}}ready{{else}}not ready{{/if}} to play!</p>
+          </div>
+      {{/md-collection}}
+    </section>
+</div>

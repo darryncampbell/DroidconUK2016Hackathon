@@ -66,6 +66,7 @@ dependencies {
 
     provided(name: 'com.symbol.emdk', ext: 'jar')
     compile(name: 'bluetoothtap-2.0.0', ext: 'aar')
+    compile(name: 'zxing-core', ext: 'jar')
 
     compile "com.google.firebase:firebase-core:${firebaseVersion}"
     compile "com.google.firebase:firebase-database:${firebaseVersion}"
