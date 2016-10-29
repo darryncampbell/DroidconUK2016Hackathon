@@ -27,19 +27,21 @@ class PlayerStateAdapter : RecyclerView.Adapter<RowViewHolder>() {
                     return item1.player.name == item2.player.name
                 }
 
-                override fun compare(o1: PlayerState, o2: PlayerState): Int {
-                    if (playerMe.name == o1.player.name) {
-                        // Always place us on top
-                        return if (o2.player.name == playerMe.name) 0 else 1
+                override fun compare(mine: PlayerState, their: PlayerState): Int {
+                    if (mine.player.name == their.player.name) {
+                        return 0
 
                     } else {
-                        return if (o2.player == playerMe) -1
+                        // Always place us on top
+                        if (mine.player.name == playerMe.name) return 1
+                        if (their.player.name == playerMe.name) return -1
 
                         // Otherwise sort by score
-                        else o1.player.simpleScore().compareTo(o2.player.simpleScore())
+                        else return mine.player.simpleScore().compareTo(their.player.simpleScore())
                     }
                 }
             })
+
 
     override fun onBindViewHolder(holder: RowViewHolder, position: Int) {
 

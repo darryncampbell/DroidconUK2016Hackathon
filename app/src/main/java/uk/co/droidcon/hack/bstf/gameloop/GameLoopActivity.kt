@@ -15,7 +15,6 @@ import butterknife.bindView
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
 import rx.subscriptions.CompositeSubscription
-import timber.log.Timber
 import uk.co.droidcon.hack.bstf.BstfComponent
 import uk.co.droidcon.hack.bstf.BstfGameManager
 import uk.co.droidcon.hack.bstf.R
@@ -75,7 +74,9 @@ class GameLoopActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         scanController.onResume()
-        val subscription = gameManager.observePlayerState().subscribe { adapter.updateList(it) }
+        val subscription = gameManager.observePlayerState()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe { adapter.updateList(it) }
         val scanSubscription = scanController.observeScanResults()
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
