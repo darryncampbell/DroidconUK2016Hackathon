@@ -141,4 +141,6 @@ class BstfGameManager(database: FirebaseDatabase, gameId: Int) : ValueEventListe
         gameSession.isStarted = true
         databaseReference.setValue(gameSession)
     }
+
+    fun hasEnoughPlayers() = gameSession.players!!.size > 1
 }
