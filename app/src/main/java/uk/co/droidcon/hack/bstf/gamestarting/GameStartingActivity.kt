@@ -80,7 +80,7 @@ class GameStartingActivity : AppCompatActivity() {
                         isReadyButton.text = if (gameManager.me != null && gameManager.me!!.isReady) "not ready" else "ready"
                     }
                 })
-
+9
         subscriptions.add(playersSubscription)
         subscriptions.add(isReadySubscription)
     }
