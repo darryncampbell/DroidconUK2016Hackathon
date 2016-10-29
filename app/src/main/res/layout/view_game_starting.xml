@@ -19,7 +19,9 @@
         android:id="@+id/game_starting_players"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/game_starting_game_id" />
+        android:layout_below="@+id/game_starting_game_id"
+        tools:listitem="@layout/view_game_starting_player"
+        />
 
     <Button
         android:id="@+id/game_starting_ready"

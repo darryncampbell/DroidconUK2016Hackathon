@@ -1,7 +1,5 @@
 package uk.co.droidcon.hack.bstf.gamestarting
 
-import android.support.v4.content.ContextCompat
-import android.support.v4.graphics.drawable.DrawableCompat
 import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.LayoutInflater
@@ -38,8 +36,6 @@ class GameStartingPlayersAdapter : RecyclerView.Adapter<GameStartingPlayersAdapt
 
         Glide.with(holder.itemView.context).load(profile.avatarId).into(holder.avatarView)
         holder.isReadyView.setImageResource(if (player.isReady) R.drawable.checked else R.drawable.unchecked)
-        val tintColor = if (player.isReady) R.color.colorPrimary else android.R.color.darker_gray
-        DrawableCompat.setTint(holder.isReadyView.drawable, ContextCompat.getColor(holder.itemView.context, tintColor))
     }
 
     override fun getItemCount(): Int {
