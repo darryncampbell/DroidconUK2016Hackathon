@@ -10,6 +10,8 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import butterknife.bindView
+import rx.android.schedulers.AndroidSchedulers
+import rx.schedulers.Schedulers
 import rx.subscriptions.CompositeSubscription
 import uk.co.droidcon.hack.bstf.BstfComponent
 import uk.co.droidcon.hack.bstf.BstfGameManager
@@ -58,6 +60,8 @@ class GameStartingActivity : AppCompatActivity() {
         }
 
         val playersSubscription = gameManager.observePlayers()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
                     adapter.setPlayers(it)
                     if (!gameManager.gameSession.isStarted && it.size > 1 && it.all { it.isReady }) {
@@ -66,6 +70,8 @@ class GameStartingActivity : AppCompatActivity() {
                 })
 
         val isReadySubscription = gameManager.observeSyncedState()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
                     if (gameManager.me == null && !gameManager.gameSession.isStarted) {
                         assignProfile()

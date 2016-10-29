@@ -56,14 +56,14 @@ public class ScanControllerImpl implements ScanController, EMDKManager.EMDKListe
     public void onPause() {
         Timber.v("onPause");
         destroyScanner();
-        releaseEmdkManager();
+        releaseEmdkManager(false);
     }
 
     @Override
     public void onDestroy() {
         Timber.v("onDestroy");
         destroyScanner();
-        releaseEmdkManager();
+        releaseEmdkManager(true);
     }
 
     @Override
@@ -103,7 +103,6 @@ public class ScanControllerImpl implements ScanController, EMDKManager.EMDKListe
 
     private void initBarcodeManager() {
         barcodeManager = (BarcodeManager) emdkManager.getInstance(FEATURE_TYPE.BARCODE);
-        barcodeManager.addConnectionListener(this);
     }
 
     private void initScanner() {
@@ -152,7 +151,7 @@ public class ScanControllerImpl implements ScanController, EMDKManager.EMDKListe
     @Override
     public void onClosed() {
         Timber.v("onClosed");
-        releaseEmdkManager();
+        releaseEmdkManager(true);
     }
 
     private void destroyScanner() {
@@ -176,16 +175,17 @@ public class ScanControllerImpl implements ScanController, EMDKManager.EMDKListe
         }
     }
 
-    private void releaseEmdkManager() {
+    private void releaseEmdkManager(boolean complete) {
         Timber.v("releaseEmdkManager: %s", emdkManager);
-        if (barcodeManager != null) {
-            barcodeManager.removeConnectionListener(this);
-            barcodeManager = null;
-        }
+        barcodeManager = null;
 
         if (emdkManager != null) {
-            emdkManager.release();
-            emdkManager = null;
+            if (complete) {
+                emdkManager.release();
+                emdkManager = null;
+            } else {
+                emdkManager.release(FEATURE_TYPE.BARCODE);
+            }
         }
     }
 
@@ -216,4 +216,5 @@ public class ScanControllerImpl implements ScanController, EMDKManager.EMDKListe
                 break;
         }
     }
+
 }
