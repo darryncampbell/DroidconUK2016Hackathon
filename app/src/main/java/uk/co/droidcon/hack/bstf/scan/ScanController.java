@@ -14,8 +14,9 @@ public interface ScanController {
 
     void onDestroy();
 
+    Observable observeScanTrigger();
+
     Observable<String> observeScanResults();
 
     void setEnabled(boolean enabled);
-
 }

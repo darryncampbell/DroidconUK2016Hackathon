@@ -29,6 +29,7 @@ public class ScanControllerImpl implements ScanController, EMDKManager.EMDKListe
     private Scanner scanner;
     private boolean scannerEnabled;
 
+    private BehaviorSubject scannerTriggerSubject = BehaviorSubject.create();
     private BehaviorSubject<String> scanResultSubject = BehaviorSubject.create();
 
     @Override
@@ -63,6 +64,11 @@ public class ScanControllerImpl implements ScanController, EMDKManager.EMDKListe
         Timber.v("onDestroy");
         destroyScanner();
         releaseEmdkManager(false);
+    }
+
+    @Override
+    public Observable observeScanTrigger() {
+        return scannerTriggerSubject.asObservable();
     }
 
     @Override
@@ -207,6 +213,9 @@ public class ScanControllerImpl implements ScanController, EMDKManager.EMDKListe
             case IDLE:
                 configure();
                 read();
+                break;
+            case SCANNING:
+                scannerTriggerSubject.onNext(new Object());
                 break;
         }
     }
