@@ -7,7 +7,10 @@ import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.Toolbar
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import butterknife.bindView
+import rx.android.schedulers.AndroidSchedulers
+import rx.schedulers.Schedulers
 import uk.co.droidcon.hack.bstf.BstfComponent
 import uk.co.droidcon.hack.bstf.BstfGameManager
 import uk.co.droidcon.hack.bstf.R
@@ -32,15 +35,25 @@ class GameStartingActivity : AppCompatActivity() {
 
         gameIdTextView.text = "Game Session " + gameManager.gameSession.id
 
-        if (gameManager.me == null) {
-            assignProfile()
-        }
-
         adapter = GameStartingPlayersAdapter()
         playersRecyclerView.adapter = adapter
         playersRecyclerView.layoutManager = LinearLayoutManager(this)
 
         adapter.setPlayers(gameManager.gameSession.players)
+
+        gameManager.observePlayers()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({ adapter.setPlayers(it) })
+
+        gameManager.observeSyncedState()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({
+                    if (gameManager.me == null) {
+                        assignProfile()
+                    }
+                })
     }
 
     fun assignProfile() {
@@ -52,6 +65,11 @@ class GameStartingActivity : AppCompatActivity() {
                 val profile = Profile.getProfileForId(player.name)
                 availableProfiles.remove(profile)
             }
+        }
+
+        if (availableProfiles.isEmpty()) {
+            Toast.makeText(this, "Party is full, sorry :(", Toast.LENGTH_SHORT).show()
+            return
         }
 
         val random = Random()
