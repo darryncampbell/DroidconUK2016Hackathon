@@ -56,7 +56,7 @@ class BstfGameManager(database: FirebaseDatabase, gameId: Int) : ValueEventListe
         databaseReference.addListenerForSingleValueEvent(this)
     }
 
-    fun setPlayer(player: Player) {
+    fun signUp(player: Player) {
         if (gameSession.players == null) {
             gameSession.players = ArrayList()
         }
@@ -64,6 +64,13 @@ class BstfGameManager(database: FirebaseDatabase, gameId: Int) : ValueEventListe
         gameSession.players?.add(player)
         databaseReference.setValue(gameSession)
         me = player
+    }
+
+    fun signOff() {
+        if (gameSession.players != null) {
+            gameSession.players!!.filter { it.name != me?.name }
+            databaseReference.setValue(gameSession)
+        }
     }
 
     fun amIAlive(): Boolean = gameSession.shotsFired!!

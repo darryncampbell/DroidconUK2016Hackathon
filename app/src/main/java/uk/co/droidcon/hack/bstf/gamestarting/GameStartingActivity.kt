@@ -76,6 +76,11 @@ class GameStartingActivity : AppCompatActivity() {
         val randomIndex = random.nextInt(availableProfiles.size)
         val profile = availableProfiles[randomIndex]
 
-        gameManager.setPlayer(Player(profile.id))
+        gameManager.signUp(Player(profile.id))
+    }
+
+    override fun onBackPressed() {
+        gameManager.signOff()
+        super.onBackPressed()
     }
 }
