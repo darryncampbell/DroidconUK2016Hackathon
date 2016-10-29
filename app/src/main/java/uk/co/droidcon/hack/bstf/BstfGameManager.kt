@@ -28,7 +28,6 @@ class BstfGameManager(database: FirebaseDatabase, gameId: Int) : ValueEventListe
             gameSession = dataSnapshot.getValue(GameSession::class.java)
         } else {
             databaseReference.setValue(gameSession)
-            databaseReference.push()
         }
     }
 
@@ -42,7 +41,7 @@ class BstfGameManager(database: FirebaseDatabase, gameId: Int) : ValueEventListe
         databaseReference.addListenerForSingleValueEvent(this)
     }
 
-    fun addPlayer(player: Player) {
+    fun setPlayer(player: Player) {
         if (gameSession.players == null) {
             gameSession.players = ArrayList()
         }

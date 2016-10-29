@@ -38,6 +38,6 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        bstfGameManager.addPlayer(new Player(name));
+        bstfGameManager.setPlayer(new Player(name));
     }
 }
