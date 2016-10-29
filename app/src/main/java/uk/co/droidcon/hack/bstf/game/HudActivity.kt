@@ -13,6 +13,7 @@ import android.widget.TextView
 import butterknife.bindView
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
+import uk.co.droidcon.hack.bstf.NfcItemController
 import uk.co.droidcon.hack.bstf.R
 import uk.co.droidcon.hack.bstf.models.Weapon
 import uk.co.droidcon.hack.bstf.reload.battery.BatteryStateReceiver
@@ -35,6 +36,7 @@ open class HudActivity : AppCompatActivity() {
     protected val reloadReceiver = ReloadReceiver()
 
     internal var  scanController: ScanController? = null
+    internal var  nfcItemController: NfcItemController? = null
 
     val text: TextView by bindView(R.id.info)
     val gunName: TextView by bindView(R.id.gun_name)
@@ -49,11 +51,17 @@ open class HudActivity : AppCompatActivity() {
         soundManager = SoundManager.getInstance(this)
 
         setupScanController()
+        setupNfcItemController()
 
         setupShooting()
 
         updateWeaponUi()
         updateTopUi()
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        nfcItemController?.handleIntent(intent)
     }
 
     open fun setupScanController() {
@@ -66,14 +74,46 @@ open class HudActivity : AppCompatActivity() {
                 subscribe { shoot() }
     }
 
+    fun parseItem(item: NfcItemController.Item) {
+        when(item) {
+            NfcItemController.Item.LASER -> switchToWeapon(Weapon.LASER)
+            NfcItemController.Item.GLOCK -> switchToWeapon(Weapon.GLOCK)
+            NfcItemController.Item.AMMO -> {
+                count = AMMO_COUNT
+                gunEmpty = false
+                updateWeaponUi()
+                updateTopUi()
+            }
+        }
+    }
+
+    private fun switchToWeapon(newWeapon: Weapon) {
+        weapon = newWeapon
+        count = AMMO_COUNT
+        gunEmpty = false
+        updateWeaponUi()
+        updateTopUi()
+    }
+
+    fun setupNfcItemController() {
+        nfcItemController = NfcItemController()
+        nfcItemController?.setupNfcAdapter(this)
+
+        nfcItemController!!.observeItemResults().
+                subscribeOn(Schedulers.computation()).
+                observeOn(AndroidSchedulers.mainThread()).
+                subscribe { parseItem(it) }
+    }
 
     override fun onResume() {
         scanController?.onResume()
+        nfcItemController?.onResume(this)
         super.onResume()
     }
 
     override fun onPause() {
         scanController?.onPause()
+        nfcItemController?.onPause(this)
         super.onPause()
     }
 

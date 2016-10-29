@@ -9,7 +9,6 @@ import android.support.v4.content.LocalBroadcastManager
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.DefaultItemAnimator
 import android.support.v7.widget.RecyclerView
-import android.text.style.UpdateLayout
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
@@ -19,7 +18,9 @@ import rx.schedulers.Schedulers
 import rx.subscriptions.CompositeSubscription
 import uk.co.droidcon.hack.bstf.BstfComponent
 import uk.co.droidcon.hack.bstf.BstfGameManager
+import uk.co.droidcon.hack.bstf.NfcItemController
 import uk.co.droidcon.hack.bstf.R
+import uk.co.droidcon.hack.bstf.game.HudActivity
 import uk.co.droidcon.hack.bstf.models.Profile
 import uk.co.droidcon.hack.bstf.models.Weapon
 import uk.co.droidcon.hack.bstf.reload.battery.BatteryStateReceiver
@@ -40,7 +41,7 @@ class GameLoopActivity : AppCompatActivity() {
     val ammoCount: TextView by bindView(R.id.ammo_count)
     val ammoImage: ImageView by bindView(R.id.ammo_image)
 
-    var count = AMMO_COUNT // TODO: up this upon item pickup
+    var count = AMMO_COUNT
     var gunEmpty = false
     var weapon = Weapon.GLOCK
 
@@ -49,6 +50,7 @@ class GameLoopActivity : AppCompatActivity() {
     lateinit var gameManager: BstfGameManager
     lateinit var adapter: PlayerStateAdapter
     lateinit var scanController: ScanController
+    lateinit var nfcItemController: NfcItemController
 
     val reloadReceiver = ReloadReceiver()
     val subscriptions = CompositeSubscription()
@@ -70,8 +72,12 @@ class GameLoopActivity : AppCompatActivity() {
         recycler.itemAnimator = DefaultItemAnimator()
 
         gameManager.gameStarted()
+
         scanController = ScanControllerImpl()
         scanController.onCreate(this)
+
+        nfcItemController = NfcItemController()
+        nfcItemController.setupNfcAdapter(this)
 
         updateWeaponUi()
         updateTopUi()
@@ -80,6 +86,7 @@ class GameLoopActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         scanController.onResume()
+        nfcItemController.onResume(this)
         val subscription = gameManager.observePlayerState()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe {
@@ -96,9 +103,15 @@ class GameLoopActivity : AppCompatActivity() {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe { shoot() }
 
+        val nfcItemPickupSubscription = nfcItemController.observeItemResults().
+                subscribeOn(Schedulers.computation()).
+                observeOn(AndroidSchedulers.mainThread()).
+                subscribe { parseItem(it) }
+
         subscriptions.add(subscription)
         subscriptions.add(scanSubscription)
         subscriptions.add(triggersSubscription)
+        subscriptions.add(nfcItemPickupSubscription)
     }
 
     private fun parseHit(tag: String) {
@@ -109,6 +122,27 @@ class GameLoopActivity : AppCompatActivity() {
                 gameManager.shoot(player)
             }
         }
+    }
+
+    fun parseItem(item: NfcItemController.Item) {
+        when(item) {
+            NfcItemController.Item.LASER -> switchToWeapon(Weapon.LASER)
+            NfcItemController.Item.GLOCK -> switchToWeapon(Weapon.GLOCK)
+            NfcItemController.Item.AMMO -> {
+                count = AMMO_COUNT
+                gunEmpty = false
+                updateWeaponUi()
+                updateTopUi()
+            }
+        }
+    }
+
+    private fun switchToWeapon(newWeapon: Weapon) {
+        weapon = newWeapon
+        count = HudActivity.AMMO_COUNT
+        gunEmpty = false
+        updateWeaponUi()
+        updateTopUi()
     }
 
     private fun shoot() {
@@ -163,6 +197,7 @@ class GameLoopActivity : AppCompatActivity() {
 
     override fun onPause() {
         scanController.onPause()
+        nfcItemController.onPause(this)
         subscriptions.clear()
         super.onPause()
     }
@@ -170,6 +205,11 @@ class GameLoopActivity : AppCompatActivity() {
     override fun onDestroy() {
         scanController.onDestroy()
         super.onDestroy()
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        nfcItemController.handleIntent(intent)
     }
 
     inner class ReloadReceiver() : BroadcastReceiver() {

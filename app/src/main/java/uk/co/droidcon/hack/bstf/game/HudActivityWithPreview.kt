@@ -35,13 +35,9 @@ class HudActivityWithPreview : HudActivity(), SurfaceHolder.Callback {
         camera.setDisplayOrientation(90)
     }
 
-    override fun onPause() {
-        super.onPause()
-        camera.stopPreview()
-    }
-
     override fun onDestroy() {
         localBroadcastManager!!.unregisterReceiver(reloadReceiver)
+        camera.stopPreview()
         camera.release()
         super.onDestroy()
     }
@@ -81,6 +77,4 @@ class HudActivityWithPreview : HudActivity(), SurfaceHolder.Callback {
     override fun surfaceDestroyed(holder: SurfaceHolder) {
         Timber.w("HUD surfaceDestroyed")
     }
-
-
 }
