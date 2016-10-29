@@ -87,9 +87,19 @@ class GameLoopActivity : AppCompatActivity() {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe { shoot() }
 
+        val respawnScheduler = gameManager.observeRespawnTime()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe { scheduleRespawn() }
+
         subscriptions.add(subscription)
         subscriptions.add(scanSubscription)
         subscriptions.add(triggersSubscription)
+        subscriptions.add(respawnScheduler)
+    }
+
+    private fun scheduleRespawn() {
+        scanController.setEnabled(false)
     }
 
     private fun parseHit(tag: String) {

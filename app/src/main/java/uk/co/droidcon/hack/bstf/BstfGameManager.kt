@@ -19,8 +19,9 @@ class BstfGameManager(database: FirebaseDatabase, gameId: Int) : ValueEventListe
     var me: Player? = null
 
     var isSynced: Boolean = false
-    private val readyObservable: BehaviorSubject<Boolean> = BehaviorSubject.create()
+    private val readySubject: BehaviorSubject<Boolean> = BehaviorSubject.create()
     private val playersSubject: PublishSubject<ArrayList<Player>> = PublishSubject.create()
+    private val shotsFiredSubject: PublishSubject<ArrayList<ShotEvent>> = PublishSubject.create();
 
     companion object {
         val TAG = BstfGameManager::class.java.simpleName
@@ -37,7 +38,7 @@ class BstfGameManager(database: FirebaseDatabase, gameId: Int) : ValueEventListe
         if (dataSnapshot == null) return
         if (!isSynced) {
             isSynced = true
-            readyObservable.onNext(isSynced)
+            readySubject.onNext(isSynced)
         }
 
         Log.d(TAG, dataSnapshot.toString())
@@ -46,6 +47,7 @@ class BstfGameManager(database: FirebaseDatabase, gameId: Int) : ValueEventListe
             gameSession.players = if (gameSession.players != null) ArrayList(gameSession.players!!.filter { it != null }) else ArrayList()
             gameSession.shotsFired = if (gameSession.shotsFired != null) ArrayList(gameSession.shotsFired!!.filter { it != null }) else ArrayList()
             playersSubject.onNext(gameSession.players)
+            shotsFiredSubject.onNext(gameSession.shotsFired)
         } else {
             databaseReference.setValue(gameSession)
         }
@@ -92,22 +94,20 @@ class BstfGameManager(database: FirebaseDatabase, gameId: Int) : ValueEventListe
             .filter { event -> event.millis > System.currentTimeMillis().minus(RESPAWN_DURATION_MILLIS) }
             .any()
 
-
-    fun shoot(target: Player) {
-        gameSession.shotsFired!!.add(ShotEvent(me!!, target, System.currentTimeMillis()))
-        databaseReference.setValue(gameSession)
-    }
-
     fun observePlayers(): Observable<ArrayList<Player>> {
         return playersSubject.asObservable()
     }
 
     fun observeSyncedState(): Observable<Boolean> {
-        return readyObservable.asObservable()
+        return readySubject.asObservable()
     }
 
     fun observePlayerState(): Observable<List<PlayerState>> {
         return observePlayers().map { playerList -> makePlayerStateList(playerList) }
+    }
+
+    fun observeShotsFired(): Observable<ArrayList<ShotEvent>> {
+        return shotsFiredSubject.asObservable()
     }
 
     fun toggleReadyState() {
@@ -141,6 +141,4 @@ class BstfGameManager(database: FirebaseDatabase, gameId: Int) : ValueEventListe
         gameSession.isStarted = true
         databaseReference.setValue(gameSession)
     }
-
-    fun hasEnoughPlayers() = gameSession.players!!.size > 1
 }
