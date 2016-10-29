@@ -10,6 +10,7 @@ import butterknife.ButterKnife;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
+import timber.log.Timber;
 import uk.co.droidcon.hack.bstf.scan.ScanController;
 import uk.co.droidcon.hack.bstf.scan.ScanControllerImpl;
 
@@ -27,6 +28,8 @@ public class MainActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         setSupportActionBar(toolbar);
 
+        Timber.v("init");
+
         scanController = new ScanControllerImpl();
         scanController.onCreate(this);
 
@@ -42,7 +45,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        scanController.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        scanController.onPause();
+        super.onPause();
+    }
+
+    @Override
     protected void onDestroy() {
+        Timber.v("onDestroy");
         scanController.onDestroy();
         super.onDestroy();
     }

@@ -11,6 +11,14 @@ public class ScanControllerImpl implements ScanController {
     }
 
     @Override
+    public void onResume() {
+    }
+
+    @Override
+    public void onPause() {
+    }
+
+    @Override
     public void onDestroy() {
     }
 
