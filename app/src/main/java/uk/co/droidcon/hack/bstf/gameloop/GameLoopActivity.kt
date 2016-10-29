@@ -25,8 +25,8 @@ class GameLoopActivity : AppCompatActivity() {
     lateinit var gameManager: BstfGameManager
     lateinit var adapter: PlayerStateAdapter
 
-    override fun onCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
-        super.onCreate(savedInstanceState, persistentState)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_game_loop)
 
         buttonShoot.setOnClickListener { view ->
