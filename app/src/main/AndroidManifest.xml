@@ -31,7 +31,7 @@
         </activity>
 
         <activity
-            android:name=".GameLoopActivity"
+            android:name=".gameloop.GameLoopActivity"
             android:theme="@style/AppTheme.Fullscreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

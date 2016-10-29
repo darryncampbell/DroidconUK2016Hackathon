@@ -4,4 +4,7 @@
     <string name="app_name">BSTF</string>
     <string name="button__dev_shoot_random"><![CDATA[Shoot <random>]]></string>
     <string name="button__dev_shot_by_random"><![CDATA[Shot by <random>]]></string>
+    <string name="text__player_state_summary">Kills: %d\nDeaths: %d</string>
+    <string name="text__player_state_relative_summary">Killed you: %d\nKilled by you: %d</string>
+
 </resources>

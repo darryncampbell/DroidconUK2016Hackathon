@@ -7,6 +7,7 @@ import rx.subjects.BehaviorSubject
 import rx.subjects.PublishSubject
 import uk.co.droidcon.hack.bstf.models.GameSession
 import uk.co.droidcon.hack.bstf.models.Player
+import uk.co.droidcon.hack.bstf.models.PlayerState
 import uk.co.droidcon.hack.bstf.models.ShotEvent
 import java.util.*
 
@@ -101,6 +102,18 @@ class BstfGameManager(database: FirebaseDatabase, gameId: Int) : ValueEventListe
 
     fun observeSyncedState(): Observable<Boolean> {
         return readyObservable.asObservable()
+    }
+
+    fun observePlayerState(): Observable<List<PlayerState>> {
+        return observePlayers().map { playerList ->
+            playerList.map { player ->
+                PlayerState(player, gameSession.shotsFired!!.filter { event ->
+                    event.source == player
+                }, gameSession.shotsFired!!.filter { event ->
+                    event.target == player
+                })
+            }
+        }
     }
 
     fun toggleReadyState() {
