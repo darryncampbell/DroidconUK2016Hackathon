@@ -71,7 +71,7 @@ class GameStartingActivity : AppCompatActivity() {
                         assignProfile()
                         adapter.me = gameManager.me
                         isReadyButton.visibility = View.VISIBLE
-                        isReadyButton.text = if (gameManager.me!!.isReady) "not ready" else "ready"
+                        isReadyButton.text = if (gameManager.me != null && gameManager.me!!.isReady) "not ready" else "ready"
                     }
                 })
 

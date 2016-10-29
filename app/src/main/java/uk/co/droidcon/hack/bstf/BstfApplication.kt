@@ -7,6 +7,7 @@ import android.support.multidex.MultiDexApplication
 import com.google.firebase.database.FirebaseDatabase
 import timber.log.Timber
 import uk.co.droidcon.hack.bstf.reload.battery.BatteryStateReceiver
+import uk.co.droidcon.hack.bstf.sounds.SoundManager
 
 class BstfApplication : MultiDexApplication() {
 
@@ -18,6 +19,9 @@ class BstfApplication : MultiDexApplication() {
         BstfComponent.setBstfGameManager(BstfGameManager(FirebaseDatabase.getInstance(), 1))
 
         Timber.plant(Timber.DebugTree())
+
+        // Loads all the sounds
+        SoundManager.getInstance(this)
 
         val batteryFilter = IntentFilter(Intent.ACTION_BATTERY_OKAY)
         batteryFilter.addAction(Intent.ACTION_BATTERY_LOW)

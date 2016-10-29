@@ -181,7 +181,7 @@
                 <parm name="databar_to_upc_ean" value="Default"/>
             </characteristic>
             <characteristic type="ReaderParams">
-                <parm name="beam_timer" value="15000"/>
+                <parm name="beam_timer" value="200"/>
                 <parm name="linear_security_level" value="Default"/>
                 <parm name="picklist" value="Default"/>
                 <parm name="illumination_mode" value="Default"/>
