@@ -5,7 +5,6 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.Toolbar
-import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import butterknife.bindView
@@ -52,6 +51,7 @@ class GameStartingActivity : AppCompatActivity() {
                 .subscribe({
                     if (gameManager.me == null) {
                         assignProfile()
+                        adapter.me = gameManager.me
                     }
                 })
     }

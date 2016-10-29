@@ -15,6 +15,7 @@ import java.util.*
 class GameStartingPlayersAdapter : RecyclerView.Adapter<GameStartingPlayersAdapter.GameStartingPlayersViewHolder>() {
 
     private var players: ArrayList<Player> = ArrayList()
+    var me: Player? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GameStartingPlayersViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.view_game_starting_player, parent, false)
@@ -24,7 +25,13 @@ class GameStartingPlayersAdapter : RecyclerView.Adapter<GameStartingPlayersAdapt
     override fun onBindViewHolder(holder: GameStartingPlayersViewHolder, position: Int) {
         val player = players[position]
         val profile = Profile.getProfileForId(player.name)
-        holder.nameView.text = player.name
+
+        if (player.name == me?.name) {
+            holder.nameView.text = player.name + " (me)"
+        } else {
+            holder.nameView.text = player.name
+        }
+
         holder.avatarView.setImageResource(profile.avatarId)
     }
 

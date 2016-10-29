@@ -70,7 +70,9 @@ class BstfGameManager(database: FirebaseDatabase, gameId: Int) : ValueEventListe
 
     fun signOff() {
         if (gameSession.players != null) {
-            gameSession.players!!.filter { it.name != me?.name }
+            val players = ArrayList<Player>()
+            players.addAll(gameSession.players!!.filter { it.name != me?.name })
+            gameSession.players = players
             databaseReference.setValue(gameSession)
         }
     }
