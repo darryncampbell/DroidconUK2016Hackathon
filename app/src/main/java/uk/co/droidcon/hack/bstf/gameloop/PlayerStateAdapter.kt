@@ -72,6 +72,7 @@ class PlayerStateAdapter : RecyclerView.Adapter<RowViewHolder>() {
     fun updateList(stateList: List<PlayerState>) {
         playerStateList.beginBatchedUpdates()
         try {
+            playerStateList.clear()
             playerStateList.addAll(stateList)
         } finally {
             playerStateList.endBatchedUpdates()
