@@ -2,4 +2,6 @@
 
 <resources>
     <string name="app_name">BSTF</string>
+    <string name="button__dev_shoot_random"><![CDATA[Shoot <random>]]></string>
+    <string name="button__dev_shot_by_random"><![CDATA[Shot by <random>]]></string>
 </resources>
