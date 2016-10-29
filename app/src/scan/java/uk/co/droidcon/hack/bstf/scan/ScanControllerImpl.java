@@ -27,7 +27,7 @@ public class ScanControllerImpl implements ScanController, EMDKManager.EMDKListe
     private EMDKManager emdkManager;
     private BarcodeManager barcodeManager;
     private Scanner scanner;
-    private boolean scannerEnabled;
+    private boolean scannerEnabled = true;
 
     private BehaviorSubject scannerTriggerSubject = BehaviorSubject.create();
     private BehaviorSubject<String> scanResultSubject = BehaviorSubject.create();
@@ -84,9 +84,8 @@ public class ScanControllerImpl implements ScanController, EMDKManager.EMDKListe
             if (enabled) {
                 scanner.enable();
                 read();
-            } else {
-                scanner.disable();
             }
+            configure();
         } catch (ScannerException e) {
             Timber.v(e, "cannot enable: %b", enabled);
         }
@@ -140,9 +139,8 @@ public class ScanControllerImpl implements ScanController, EMDKManager.EMDKListe
             config.scanParams.decodeLEDTime = 1000;
             config.readerParams.readerSpecific.imagerSpecific.beamTimer = 300;
             config.readerParams.readerSpecific.laserSpecific.powerMode = ScannerConfig.PowerMode.HIGH;
-            config.readerParams.readerSpecific.imagerSpecific.aimingPattern = ScannerConfig.AimingPattern.ON;
-
-            config.readerParams.readerSpecific.imagerSpecific.illuminationMode = ScannerConfig.IlluminationMode.ON;
+            config.readerParams.readerSpecific.imagerSpecific.aimingPattern = scannerEnabled ? ScannerConfig.AimingPattern.ON : ScannerConfig.AimingPattern.OFF;
+            config.readerParams.readerSpecific.imagerSpecific.illuminationMode = scannerEnabled ? ScannerConfig.IlluminationMode.ON : ScannerConfig.IlluminationMode.OFF;
             config.readerParams.readerSpecific.imagerSpecific.illuminationBrightness = 10;
 
             scanner.setConfig(config);
