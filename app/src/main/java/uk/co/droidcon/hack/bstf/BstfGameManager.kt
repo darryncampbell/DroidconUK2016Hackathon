@@ -44,6 +44,7 @@ class BstfGameManager(database: FirebaseDatabase, gameId: Int) : ValueEventListe
         if (dataSnapshot.exists()) {
             gameSession = dataSnapshot.getValue(GameSession::class.java)
             gameSession.players = if (gameSession.players != null) ArrayList(gameSession.players!!.filter { it != null }) else ArrayList()
+            gameSession.shotsFired = if (gameSession.shotsFired != null) ArrayList(gameSession.shotsFired!!.filter { it != null }) else ArrayList()
             playersSubject.onNext(gameSession.players)
         } else {
             databaseReference.setValue(gameSession)
