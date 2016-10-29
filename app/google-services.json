@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "629704412348",
+    "firebase_url": "https://bstf-d63cc.firebaseio.com",
+    "project_id": "bstf-d63cc",
+    "storage_bucket": "bstf-d63cc.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:629704412348:android:e39fef0dbcd37ecb",
+        "android_client_info": {
+          "package_name": "uk.co.droidcon.hack.bstf"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "629704412348-esbg5ocbjn041ka00t2i8bi2dm3qq782.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDkbqw7a-5e74Xc_QlBTH-X2gMUTNegQns"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

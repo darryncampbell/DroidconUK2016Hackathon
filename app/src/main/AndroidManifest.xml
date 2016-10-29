@@ -5,6 +5,7 @@
     package="uk.co.droidcon.hack.bstf">
 
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:name=".BstfApplication"
@@ -15,6 +16,22 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:replace="android:allowBackup">
+
+        <activity android:name=".MainActivity" />
+        <activity android:name=".gamestarting.GameStartingActivity" />
+
+        <activity
+            android:name=".gameloop.GameLoopActivity"
+            android:theme="@style/AppTheme.Fullscreen" />
+
+        <activity-alias
+            android:name="EntryPointActivity"
+            android:targetActivity=".gamestarting.GameStartingActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
 
         <activity android:name=".game.HudActivity">
             <intent-filter>
