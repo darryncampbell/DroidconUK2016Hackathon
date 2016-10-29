@@ -51,12 +51,6 @@ class HudActivityWithPreview : HudActivity(), SurfaceHolder.Callback {
         cameraPreview.setOnClickListener {
             if (!gunEmpty) {
                 shoot()
-                count--
-                if (count <= 0) {
-                    gunEmpty = true
-                }
-
-                updateUi()
             }
         }
     }

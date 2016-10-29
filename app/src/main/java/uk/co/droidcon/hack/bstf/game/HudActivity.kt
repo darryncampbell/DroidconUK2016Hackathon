@@ -11,9 +11,12 @@ import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.widget.TextView
 import butterknife.bindView
+import rx.android.schedulers.AndroidSchedulers
+import rx.schedulers.Schedulers
 import uk.co.droidcon.hack.bstf.R
 import uk.co.droidcon.hack.bstf.reload.battery.BatteryStateReceiver
 import uk.co.droidcon.hack.bstf.scan.ScanController
+import uk.co.droidcon.hack.bstf.scan.ScanControllerImpl
 
 open class HudActivity : AppCompatActivity() {
 
@@ -25,7 +28,6 @@ open class HudActivity : AppCompatActivity() {
     protected var gunEmpty = false
 
     protected var localBroadcastManager: LocalBroadcastManager? = null
-    internal var mediaPlayer: MediaPlayer? = null
     protected val reloadReceiver = ReloadReceiver()
 
     lateinit internal var scanController: ScanController
@@ -47,8 +49,13 @@ open class HudActivity : AppCompatActivity() {
     }
 
     open fun setupScanController() {
-        scanController = ScanController()
+        scanController = ScanControllerImpl()
         scanController.onCreate(this)
+
+        scanController.observeScanTrigger().
+                subscribeOn(Schedulers.computation()).
+                observeOn(AndroidSchedulers.mainThread()).
+                subscribe { shoot() }
     }
 
     override fun onDestroy() {
@@ -62,7 +69,22 @@ open class HudActivity : AppCompatActivity() {
     }
 
     protected fun shoot() {
-        MediaPlayer.create(this, R.raw.pistol).start()
+        if (gunEmpty) {
+            // TODO: empty sound
+            // TODO: animate ammo
+            return
+        }
+
+        count--
+        if (count <= 0) {
+            gunEmpty = true
+            scanController.setEnabled(false)
+        } else {
+            // TODO: improve with soundPool
+            MediaPlayer.create(this, R.raw.pistol).start()
+        }
+
+        updateUi()
     }
 
     protected fun updateUi() {
@@ -73,6 +95,7 @@ open class HudActivity : AppCompatActivity() {
     private fun gunReloaded() {
         count = AMMO_COUNT
         gunEmpty = false
+        scanController.setEnabled(true)
         updateUi()
     }
 

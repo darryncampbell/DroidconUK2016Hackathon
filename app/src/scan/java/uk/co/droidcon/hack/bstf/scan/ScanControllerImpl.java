@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.symbol.emdk.EMDKManager;
 import com.symbol.emdk.EMDKResults;
+import com.symbol.emdk.VersionManager;
 import com.symbol.emdk.barcode.BarcodeManager;
 import com.symbol.emdk.barcode.ScanDataCollection;
 import com.symbol.emdk.barcode.Scanner;
@@ -25,6 +26,7 @@ public class ScanControllerImpl implements ScanController, EMDKManager.EMDKListe
     private EMDKManager emdkManager;
     private Scanner scanner;
 
+    private BehaviorSubject scannerTriggerSubject = BehaviorSubject.create();
     private BehaviorSubject<String> scanResultSubject = BehaviorSubject.create();
 
     @Override
@@ -38,6 +40,11 @@ public class ScanControllerImpl implements ScanController, EMDKManager.EMDKListe
     @Override
     public void onDestroy() {
         releaseEmdkManager();
+    }
+
+    @Override
+    public Observable observeScanTrigger() {
+        return scannerTriggerSubject.asObservable();
     }
 
     @Override
@@ -94,6 +101,9 @@ public class ScanControllerImpl implements ScanController, EMDKManager.EMDKListe
                 switch (statusData.getState()) {
                     case IDLE:
                         read();
+                        break;
+                    case SCANNING:
+                        scannerTriggerSubject.onNext(new Object());
                         break;
                 }
                 Timber.v("onStatus: %s %s", statusData.getFriendlyName(), statusData.getState());
