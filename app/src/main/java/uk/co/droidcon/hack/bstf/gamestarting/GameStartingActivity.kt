@@ -1,5 +1,6 @@
 package uk.co.droidcon.hack.bstf.gamestarting
 
+import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
@@ -15,6 +16,7 @@ import rx.schedulers.Schedulers
 import uk.co.droidcon.hack.bstf.BstfComponent
 import uk.co.droidcon.hack.bstf.BstfGameManager
 import uk.co.droidcon.hack.bstf.R
+import uk.co.droidcon.hack.bstf.gameloop.GameLoopActivity
 import uk.co.droidcon.hack.bstf.models.Player
 import uk.co.droidcon.hack.bstf.models.Profile
 import java.util.*
@@ -44,7 +46,12 @@ class GameStartingActivity : AppCompatActivity() {
         gameManager.observePlayers()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({ adapter.setPlayers(it) })
+                .subscribe({
+                    adapter.setPlayers(it)
+                    if (it.size > 1 && it.all { it.isReady }) {
+                        openActiveGame()
+                    }
+                })
 
         gameManager.observeSyncedState()
                 .subscribeOn(Schedulers.io())
@@ -62,6 +69,10 @@ class GameStartingActivity : AppCompatActivity() {
             gameManager.toggleReadyState()
             isReadyButton.text = if (gameManager.me!!.isReady) "not ready" else "ready"
         }
+    }
+
+    private fun openActiveGame() {
+        startActivity(Intent(this, GameLoopActivity::class.java))
     }
 
     fun assignProfile() {
