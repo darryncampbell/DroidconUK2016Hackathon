@@ -6,6 +6,8 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:buttonStyle">@style/AppStyles.Button</item>
+        <item name="android:textAppearanceButton">@style/AppStyles.TextAppearance.Button</item>
     </style>
 
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
@@ -18,6 +20,23 @@
         <item name="windowActionBar">false</item>
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowContentOverlay">@null</item>
+
+    </style>
+
+    <style name="AppStyles" />
+
+    <style name="AppStyles.TextAppearance" />
+
+    <style name="AppStyles.Button" parent="Widget.AppCompat.Button">
+
+        <item name="android:background">@drawable/bg_button</item>
+
+    </style>
+
+    <style name="AppStyles.TextAppearance.Button" parent="TextAppearance.AppCompat.Button">
+
+        <item name="android:textColor">#fdfdfd</item>
+        <item name="android:textSize">18sp</item>
 
     </style>
 

@@ -24,6 +24,8 @@ import timber.log.Timber;
 
 public class ScanControllerImpl implements ScanController, EMDKManager.EMDKListener, BarcodeManager.ScannerConnectionListener, Scanner.DataListener, Scanner.StatusListener {
 
+    private static final ScanControllerImpl INSTANCE = new ScanControllerImpl();
+
     private EMDKManager emdkManager;
     private BarcodeManager barcodeManager;
     private Scanner scanner;
@@ -32,20 +34,20 @@ public class ScanControllerImpl implements ScanController, EMDKManager.EMDKListe
     private BehaviorSubject scannerTriggerSubject = BehaviorSubject.create();
     private BehaviorSubject<String> scanResultSubject = BehaviorSubject.create();
 
-    @Override
-    public void onCreate(Context context) {
-        Timber.v("onCreate");
-        final EMDKResults results = EMDKManager.getEMDKManager(context, this);
-        Timber.v("onCreate: %s", results.statusCode.name());
-        if (results.statusCode != EMDKResults.STATUS_CODE.SUCCESS) {
-            throw new RuntimeException();
-        }
+    public static ScanControllerImpl getInstance() {
+        return INSTANCE;
     }
 
     @Override
-    public void onResume() {
+    public void onResume(Context context) {
         Timber.v("onResume: %s, %s", emdkManager, barcodeManager);
-        if (emdkManager != null) {
+        if (emdkManager == null) {
+            final EMDKResults results = EMDKManager.getEMDKManager(context, this);
+            Timber.v("onResume: %s", results.statusCode.name());
+            if (results.statusCode != EMDKResults.STATUS_CODE.SUCCESS) {
+                throw new RuntimeException();
+            }
+        } else {
             initBarcodeManager();
             initScanner();
             setEnabled(scannerEnabled);
@@ -56,14 +58,7 @@ public class ScanControllerImpl implements ScanController, EMDKManager.EMDKListe
     public void onPause() {
         Timber.v("onPause");
         destroyScanner();
-        releaseEmdkManager();
-    }
-
-    @Override
-    public void onDestroy() {
-        Timber.v("onDestroy");
-        destroyScanner();
-        releaseEmdkManager();
+        releaseEmdkManager(true);
     }
 
     @Override
@@ -103,7 +98,6 @@ public class ScanControllerImpl implements ScanController, EMDKManager.EMDKListe
 
     private void initBarcodeManager() {
         barcodeManager = (BarcodeManager) emdkManager.getInstance(FEATURE_TYPE.BARCODE);
-        barcodeManager.addConnectionListener(this);
     }
 
     private void initScanner() {
@@ -132,11 +126,17 @@ public class ScanControllerImpl implements ScanController, EMDKManager.EMDKListe
     }
 
     private void configure() {
+        if (scanner == null) return;
+        
         try {
             final ScannerConfig config = scanner.getConfig();
 
             config.scanParams.decodeHapticFeedback = true;
             config.scanParams.decodeLEDTime = 1000;
+            config.scanParams.audioStreamType = ScannerConfig.AudioStreamType.RINGER;
+            config.scanParams.decodeAudioFeedbackUri = null;
+            config.scanParams.decodeLEDFeedback = true;
+
             config.readerParams.readerSpecific.imagerSpecific.beamTimer = 300;
             config.readerParams.readerSpecific.laserSpecific.powerMode = ScannerConfig.PowerMode.HIGH;
             config.readerParams.readerSpecific.imagerSpecific.aimingPattern = scannerEnabled ? ScannerConfig.AimingPattern.ON : ScannerConfig.AimingPattern.OFF;
@@ -152,7 +152,7 @@ public class ScanControllerImpl implements ScanController, EMDKManager.EMDKListe
     @Override
     public void onClosed() {
         Timber.v("onClosed");
-        releaseEmdkManager();
+        releaseEmdkManager(false);
     }
 
     private void destroyScanner() {
@@ -176,16 +176,17 @@ public class ScanControllerImpl implements ScanController, EMDKManager.EMDKListe
         }
     }
 
-    private void releaseEmdkManager() {
+    private void releaseEmdkManager(boolean complete) {
         Timber.v("releaseEmdkManager: %s", emdkManager);
-        if (barcodeManager != null) {
-            barcodeManager.removeConnectionListener(this);
-            barcodeManager = null;
-        }
+        barcodeManager = null;
 
         if (emdkManager != null) {
-            emdkManager.release();
-            emdkManager = null;
+            if (complete) {
+                emdkManager.release();
+                emdkManager = null;
+            } else {
+                emdkManager.release(FEATURE_TYPE.BARCODE);
+            }
         }
     }
 
@@ -216,4 +217,5 @@ public class ScanControllerImpl implements ScanController, EMDKManager.EMDKListe
                 break;
         }
     }
+
 }

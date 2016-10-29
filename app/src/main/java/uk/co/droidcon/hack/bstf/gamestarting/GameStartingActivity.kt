@@ -2,10 +2,10 @@ package uk.co.droidcon.hack.bstf.gamestarting
 
 import android.content.Intent
 import android.os.Bundle
+import android.support.v4.widget.ContentLoadingProgressBar
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
@@ -26,6 +26,7 @@ class GameStartingActivity : AppCompatActivity() {
     val gameIdTextView: TextView by bindView(R.id.game_starting_game_id)
     val playersRecyclerView: RecyclerView by bindView(R.id.game_starting_players)
     val isReadyButton: Button by bindView(R.id.game_starting_ready)
+    val progressIndicator: ContentLoadingProgressBar by bindView(R.id.progress)
 
     val subscriptions = CompositeSubscription()
 
@@ -45,7 +46,9 @@ class GameStartingActivity : AppCompatActivity() {
 
         isReadyButton.setOnClickListener {
             gameManager.toggleReadyState()
-            isReadyButton.text = if (gameManager.me!!.isReady) "not ready" else "ready"
+            val toggleReady = gameManager.me!!.isReady
+            isReadyButton.text = if (toggleReady) "not ready" else "ready"
+            isReadyButton.isActivated = !toggleReady
         }
     }
 
@@ -59,9 +62,12 @@ class GameStartingActivity : AppCompatActivity() {
             return
         }
 
+        progressIndicator.show()
+
         val playersSubscription = gameManager.observePlayers()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
+                .doOnNext { progressIndicator.hide() }
                 .subscribe({
                     adapter.setPlayers(it)
                     if (!gameManager.gameSession.isStarted && it.size > 1 && it.all { it.isReady }) {
@@ -69,24 +75,28 @@ class GameStartingActivity : AppCompatActivity() {
                     }
                 })
 
+
         val isReadySubscription = gameManager.observeSyncedState()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
+                .doOnNext { progressIndicator.hide() }
                 .subscribe({
                     if (gameManager.me == null && !gameManager.gameSession.isStarted) {
                         assignProfile()
                         adapter.me = gameManager.me
-                        isReadyButton.visibility = View.VISIBLE
-                        isReadyButton.text = if (gameManager.me != null && gameManager.me!!.isReady) "not ready" else "ready"
+                        isReadyButton.isEnabled = true
+                        val toggleReady = gameManager.me != null && gameManager.me!!.isReady
+                        isReadyButton.text = if (toggleReady) "not ready" else "ready"
+                        isReadyButton.isActivated = !toggleReady
                     }
                 })
-
         subscriptions.add(playersSubscription)
         subscriptions.add(isReadySubscription)
     }
 
     override fun onPause() {
         super.onPause()
+        progressIndicator.hide()
         subscriptions.clear()
     }
 
@@ -109,7 +119,7 @@ class GameStartingActivity : AppCompatActivity() {
 
         if (availableProfiles.isEmpty()) {
             Toast.makeText(this, "Party is full, sorry :(", Toast.LENGTH_SHORT).show()
-            isReadyButton.visibility = View.GONE
+            isReadyButton.isEnabled = false
             return
         }
 
