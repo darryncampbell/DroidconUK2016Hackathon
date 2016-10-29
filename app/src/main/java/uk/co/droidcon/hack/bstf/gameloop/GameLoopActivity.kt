@@ -9,7 +9,6 @@ import android.support.v4.content.LocalBroadcastManager
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.DefaultItemAnimator
 import android.support.v7.widget.RecyclerView
-import android.util.Log
 import android.view.View
 import android.widget.TextView
 import butterknife.bindView
@@ -19,6 +18,7 @@ import rx.subscriptions.CompositeSubscription
 import uk.co.droidcon.hack.bstf.BstfComponent
 import uk.co.droidcon.hack.bstf.BstfGameManager
 import uk.co.droidcon.hack.bstf.R
+import uk.co.droidcon.hack.bstf.models.Profile
 import uk.co.droidcon.hack.bstf.reload.battery.BatteryStateReceiver
 import uk.co.droidcon.hack.bstf.scan.ScanController
 import uk.co.droidcon.hack.bstf.scan.ScanControllerImpl
@@ -74,11 +74,13 @@ class GameLoopActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         scanController.onResume()
-        val subscription = gameManager.observePlayerState().subscribe { adapter.updateList(it) }
+        val subscription = gameManager.observePlayerState()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe { adapter.updateList(it) }
         val scanSubscription = scanController.observeScanResults()
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe { Log.d("Game", it.toString()) }
+                .subscribe { parseHit(it) }
 
         val triggersSubscription = scanController.observeScanTrigger()
                 .subscribeOn(Schedulers.computation())
@@ -90,9 +92,20 @@ class GameLoopActivity : AppCompatActivity() {
         subscriptions.add(triggersSubscription)
     }
 
+    private fun parseHit(tag: String) {
+        val profile = Profile.getProfileForId(tag)
+        if (profile == null) return
+
+        for (player in gameManager.otherPlayers()) {
+            if (player.name == profile.superHeroName) {
+                gameManager.shoot(player)
+            }
+        }
+    }
+
     fun shoot() {
         if (gunEmpty) {
-            // TODO: empty sound
+            soundManager.playSound(SoundManager.EMPTY_POP)
             // TODO: animate ammo
             return
         }
@@ -102,7 +115,6 @@ class GameLoopActivity : AppCompatActivity() {
             gunEmpty = true
             scanController.setEnabled(false)
         } else {
-            // TODO: improve with soundPool
             soundManager.playSound(SoundManager.PISTOL)
         }
 
@@ -110,8 +122,6 @@ class GameLoopActivity : AppCompatActivity() {
     }
 
     private fun gunReloaded() {
-        soundManager.playSound(SoundManager.RELOAD)
-
         count = AMMO_COUNT
         gunEmpty = false
         scanController.setEnabled(true)
@@ -135,7 +145,7 @@ class GameLoopActivity : AppCompatActivity() {
     }
 
     inner class ReloadReceiver() : BroadcastReceiver() {
-        override fun onReceive(p0: Context?, p1: Intent?) {
+        override fun onReceive(context: Context?, intent: Intent?) {
             gunReloaded()
         }
     }
