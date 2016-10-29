@@ -3,12 +3,12 @@ package uk.co.droidcon.hack.bstf.reload.battery
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.media.MediaPlayer
 import android.os.BatteryManager
 import android.support.annotation.RawRes
 import android.support.v4.content.LocalBroadcastManager
 import timber.log.Timber
 import uk.co.droidcon.hack.bstf.R
+import uk.co.droidcon.hack.bstf.sounds.SoundManager
 
 class BatteryStateReceiver(@RawRes internal val soundToPlay: Int = R.raw.reload) : BroadcastReceiver() {
 
@@ -17,7 +17,6 @@ class BatteryStateReceiver(@RawRes internal val soundToPlay: Int = R.raw.reload)
     }
 
     internal var localBroadcastManager: LocalBroadcastManager? = null
-    internal var mediaPlayer: MediaPlayer? = null
     internal var batteryWasLow: Boolean = false
 
     override fun onReceive(context: Context, intent: Intent) {
@@ -27,9 +26,6 @@ class BatteryStateReceiver(@RawRes internal val soundToPlay: Int = R.raw.reload)
 
         val action = intent.action
         if (Intent.ACTION_BATTERY_LOW == action) {
-            if (mediaPlayer == null) {
-                mediaPlayer = MediaPlayer.create(context, soundToPlay)
-            }
             batteryWasLow = true
             Timber.d("BATTERY WAS LOW")
             return
@@ -38,7 +34,7 @@ class BatteryStateReceiver(@RawRes internal val soundToPlay: Int = R.raw.reload)
         val level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
 
         if (batteryWasLow && level != 0) {
-            mediaPlayer!!.start()
+            SoundManager.getInstance(context).playSound(SoundManager.RELOAD)
             localBroadcastManager!!.sendBroadcast(Intent(ACTION_RELOAD))
             Timber.d("RELOAD!")
             batteryWasLow = false

@@ -17,6 +17,7 @@ import uk.co.droidcon.hack.bstf.R
 import uk.co.droidcon.hack.bstf.reload.battery.BatteryStateReceiver
 import uk.co.droidcon.hack.bstf.scan.ScanController
 import uk.co.droidcon.hack.bstf.scan.ScanControllerImpl
+import uk.co.droidcon.hack.bstf.sounds.SoundManager
 
 open class HudActivity : AppCompatActivity() {
 
@@ -28,6 +29,7 @@ open class HudActivity : AppCompatActivity() {
     protected var gunEmpty = false
 
     protected var localBroadcastManager: LocalBroadcastManager? = null
+    protected var soundManager: SoundManager? = null
     protected val reloadReceiver = ReloadReceiver()
 
     lateinit internal var scanController: ScanController
@@ -38,6 +40,8 @@ open class HudActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.hud)
+
+        soundManager = SoundManager.getInstance(this)
 
         setupScanController()
 
@@ -81,7 +85,8 @@ open class HudActivity : AppCompatActivity() {
             scanController.setEnabled(false)
         } else {
             // TODO: improve with soundPool
-            MediaPlayer.create(this, R.raw.pistol).start()
+//            MediaPlayer.create(this, R.raw.pistol).start()
+            soundManager!!.playSound(SoundManager.PISTOL)
         }
 
         updateUi()
