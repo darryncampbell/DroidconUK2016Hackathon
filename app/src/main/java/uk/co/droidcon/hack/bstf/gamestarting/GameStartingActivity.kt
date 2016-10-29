@@ -5,15 +5,12 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import butterknife.bindView
-import rx.Subscription
-import rx.android.schedulers.AndroidSchedulers
-import rx.schedulers.Schedulers
+import rx.subscriptions.CompositeSubscription
 import uk.co.droidcon.hack.bstf.BstfComponent
 import uk.co.droidcon.hack.bstf.BstfGameManager
 import uk.co.droidcon.hack.bstf.R
@@ -28,10 +25,10 @@ class GameStartingActivity : AppCompatActivity() {
     val playersRecyclerView: RecyclerView by bindView(R.id.game_starting_players)
     val isReadyButton: Button by bindView(R.id.game_starting_ready)
 
+    val subscriptions = CompositeSubscription()
+
     lateinit var gameManager: BstfGameManager
     lateinit var adapter: GameStartingPlayersAdapter
-    var playersSubscription: Subscription? = null
-    var isReadySubscription: Subscription? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,9 +57,7 @@ class GameStartingActivity : AppCompatActivity() {
             return
         }
 
-        playersSubscription = gameManager.observePlayers()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+        val playersSubscription = gameManager.observePlayers()
                 .subscribe({
                     adapter.setPlayers(it)
                     if (!gameManager.gameSession.isStarted && it.size > 1 && it.all { it.isReady }) {
@@ -70,9 +65,7 @@ class GameStartingActivity : AppCompatActivity() {
                     }
                 })
 
-        isReadySubscription = gameManager.observeSyncedState()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+        val isReadySubscription = gameManager.observeSyncedState()
                 .subscribe({
                     if (gameManager.me == null && !gameManager.gameSession.isStarted) {
                         assignProfile()
@@ -81,12 +74,14 @@ class GameStartingActivity : AppCompatActivity() {
                         isReadyButton.text = if (gameManager.me != null && gameManager.me!!.isReady) "not ready" else "ready"
                     }
                 })
+
+        subscriptions.add(playersSubscription)
+        subscriptions.add(isReadySubscription)
     }
 
     override fun onPause() {
         super.onPause()
-        playersSubscription?.unsubscribe()
-        isReadySubscription?.unsubscribe()
+        subscriptions.clear()
     }
 
     private fun openActiveGame() {

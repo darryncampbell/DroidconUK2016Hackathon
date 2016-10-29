@@ -9,13 +9,13 @@ import android.support.v4.content.LocalBroadcastManager
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.DefaultItemAnimator
 import android.support.v7.widget.RecyclerView
-import android.util.Log
 import android.view.View
 import android.widget.TextView
 import butterknife.bindView
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
 import rx.subscriptions.CompositeSubscription
+import timber.log.Timber
 import uk.co.droidcon.hack.bstf.BstfComponent
 import uk.co.droidcon.hack.bstf.BstfGameManager
 import uk.co.droidcon.hack.bstf.R
@@ -104,7 +104,7 @@ class GameLoopActivity : AppCompatActivity() {
 
     fun shoot() {
         if (gunEmpty) {
-            // TODO: empty sound
+            soundManager.playSound(SoundManager.EMPTY_POP)
             // TODO: animate ammo
             return
         }
@@ -147,7 +147,7 @@ class GameLoopActivity : AppCompatActivity() {
     }
 
     inner class ReloadReceiver() : BroadcastReceiver() {
-        override fun onReceive(p0: Context?, p1: Intent?) {
+        override fun onReceive(context: Context?, intent: Intent?) {
             gunReloaded()
         }
     }

@@ -81,13 +81,13 @@ public class ScanControllerImpl implements ScanController, EMDKManager.EMDKListe
         this.scannerEnabled = enabled;
         Timber.v("setEnabled: %b", enabled);
         try {
-            if (enabled) {
+            if (enabled && !scanner.isEnabled()) {
                 scanner.enable();
                 read();
             }
             configure();
         } catch (ScannerException e) {
-            Timber.v(e, "cannot enable: %b", enabled);
+            Timber.v(e, "cannot enable scanner");
         }
     }
 

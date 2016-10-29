@@ -84,7 +84,7 @@ open class HudActivity : AppCompatActivity() {
 
     protected fun shoot() {
         if (gunEmpty) {
-            // TODO: empty sound
+            soundManager!!.playSound(SoundManager.EMPTY_POP)
             // TODO: animate ammo
             return
         }
@@ -94,8 +94,6 @@ open class HudActivity : AppCompatActivity() {
             gunEmpty = true
             scanController!!.setEnabled(false)
         } else {
-            // TODO: improve with soundPool
-//            MediaPlayer.create(this, R.raw.pistol).start()
             soundManager!!.playSound(SoundManager.PISTOL)
         }
 
@@ -119,7 +117,7 @@ open class HudActivity : AppCompatActivity() {
     }
 
     inner class ReloadReceiver() : BroadcastReceiver() {
-        override fun onReceive(p0: Context?, p1: Intent?) {
+        override fun onReceive(context: Context?, intent: Intent?) {
             gunReloaded()
         }
     }
