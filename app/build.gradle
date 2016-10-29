@@ -9,7 +9,7 @@ android {
     defaultConfig {
         applicationId 'uk.co.droidcon.hack.bstf'
         minSdkVersion 19
-        targetSdkVersion rootProject.ext.targetSdkVersion
+        targetSdkVersion 19
         versionCode 1
         versionName "0.0.1"
         buildConfigField "String", "TAG", "\"BSTF_APP\""
@@ -64,5 +64,7 @@ dependencies {
     compile "com.jakewharton.timber:timber:${timberVersion}"
 
     provided(name: 'com.symbol.emdk', ext: 'jar')
-    compile(name: 'bluetoothtap-2.0.0', ext: 'aar')
+//    compile(name: 'bluetoothtap-2.0.0', ext: 'aar')
+
+    compile 'com.estimote:sdk:0.11.+@aar'
 }
