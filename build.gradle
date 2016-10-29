@@ -14,10 +14,10 @@ buildscript {
 }
 
 ext {
-    compileSdkVersion = 24
-    buildToolsVersion = '24.0.1'
-    targetSdkVersion = 24
-    supportVersion = '24.2.1'
+    compileSdkVersion = 25
+    buildToolsVersion = '25.0.0'
+    targetSdkVersion = 25
+    supportVersion = '25.0.0'
     butterknifeVersion = '8.2.1'
     rxjavaVersion = '1.1.8'
     rxandroidVersion = '1.2.1'
