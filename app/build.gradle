@@ -12,6 +12,7 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "0.0.1"
+        multiDexEnabled true
     }
 
     buildTypes {
@@ -41,16 +42,15 @@ kapt {
     generateStubs = true
 }
 
-
 project.archivesBaseName = "BSTF"
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    compile 'com.android.support:multidex:1.0.1'
     compile "com.android.support:design:${supportVersion}"
     compile "com.android.support:appcompat-v7:${supportVersion}"
 
-    compile "com.jakewharton:butterknife:${butterknifeVersion}"
-    apt "com.jakewharton:butterknife-compiler:${butterknifeVersion}"
+    compile 'com.jakewharton:kotterknife:0.1.0-SNAPSHOT'
 
     compile "io.reactivex:rxandroid:$rxandroidVersion"
     compile "io.reactivex:rxjava:$rxjavaVersion"
