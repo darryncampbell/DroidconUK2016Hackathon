@@ -10,6 +10,7 @@ import uk.co.droidcon.hack.bstf.models.Player
 import uk.co.droidcon.hack.bstf.models.ShotEvent
 import java.util.*
 
+
 class BstfGameManager(database: FirebaseDatabase, gameId: Int) : ValueEventListener {
 
     val databaseReference: DatabaseReference
@@ -23,6 +24,7 @@ class BstfGameManager(database: FirebaseDatabase, gameId: Int) : ValueEventListe
     companion object {
         val TAG = BstfGameManager::class.java.simpleName
         val REFERENCE_GAME_SESSIONS = "game_session_"
+        val RESPAWN_DURATION_MILLIS = 20000
     }
 
     override fun onCancelled(databaseError: DatabaseError?) {
@@ -66,10 +68,18 @@ class BstfGameManager(database: FirebaseDatabase, gameId: Int) : ValueEventListe
         me = player
     }
 
+    fun otherPlayers(): List<Player> {
+        return gameSession.players!!.filter { p -> p != me }
+    }
+
+    // TODO Using System.currentTimeMillis will cause sync issues
+    // Use /.info/serverTimeOffset to sync the game clock
+
     fun amIAlive(): Boolean = gameSession.shotsFired!!
             .filter { event -> event.target == me }
-            .filter { event -> event.millis > System.currentTimeMillis().minus(20000) }
+            .filter { event -> event.millis > System.currentTimeMillis().minus(RESPAWN_DURATION_MILLIS) }
             .any()
+
 
     fun shoot(target: Player) {
         gameSession.shotsFired!!.add(ShotEvent(me!!, target, System.currentTimeMillis()))
