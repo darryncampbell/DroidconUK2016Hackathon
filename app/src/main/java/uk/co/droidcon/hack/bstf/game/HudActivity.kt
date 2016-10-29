@@ -52,8 +52,7 @@ open class HudActivity : AppCompatActivity() {
     }
 
     open fun setupScanController() {
-        scanController = ScanControllerImpl()
-        scanController!!.onCreate(this)
+        scanController = ScanControllerImpl.getInstance()
 
         scanController!!.observeScanTrigger().
                 subscribeOn(Schedulers.computation()).
@@ -61,20 +60,12 @@ open class HudActivity : AppCompatActivity() {
                 subscribe { shoot() }
     }
 
-
     override fun onResume() {
-        scanController?.onResume()
         super.onResume()
     }
 
     override fun onPause() {
-        scanController?.onPause()
         super.onPause()
-    }
-
-    override fun onDestroy() {
-        scanController!!.onDestroy()
-        super.onDestroy()
     }
 
     protected open fun setupShooting() {
@@ -94,7 +85,7 @@ open class HudActivity : AppCompatActivity() {
             gunEmpty = true
             scanController!!.setEnabled(false)
         } else {
-            soundManager!!.playSound(SoundManager.PISTOL)
+            soundManager!!.playSound(SoundManager.LASER)
         }
 
         updateUi()

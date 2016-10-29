@@ -24,6 +24,8 @@ import timber.log.Timber;
 
 public class ScanControllerImpl implements ScanController, EMDKManager.EMDKListener, BarcodeManager.ScannerConnectionListener, Scanner.DataListener, Scanner.StatusListener {
 
+    private static final ScanControllerImpl INSTANCE = new ScanControllerImpl();
+
     private EMDKManager emdkManager;
     private BarcodeManager barcodeManager;
     private Scanner scanner;
@@ -32,20 +34,20 @@ public class ScanControllerImpl implements ScanController, EMDKManager.EMDKListe
     private BehaviorSubject scannerTriggerSubject = BehaviorSubject.create();
     private BehaviorSubject<String> scanResultSubject = BehaviorSubject.create();
 
-    @Override
-    public void onCreate(Context context) {
-        Timber.v("onCreate");
-        final EMDKResults results = EMDKManager.getEMDKManager(context, this);
-        Timber.v("onCreate: %s", results.statusCode.name());
-        if (results.statusCode != EMDKResults.STATUS_CODE.SUCCESS) {
-            throw new RuntimeException();
-        }
+    public static ScanControllerImpl getInstance() {
+        return INSTANCE;
     }
 
     @Override
-    public void onResume() {
+    public void onResume(Context context) {
         Timber.v("onResume: %s, %s", emdkManager, barcodeManager);
-        if (emdkManager != null) {
+        if (emdkManager == null) {
+            final EMDKResults results = EMDKManager.getEMDKManager(context, this);
+            Timber.v("onResume: %s", results.statusCode.name());
+            if (results.statusCode != EMDKResults.STATUS_CODE.SUCCESS) {
+                throw new RuntimeException();
+            }
+        } else {
             initBarcodeManager();
             initScanner();
             setEnabled(scannerEnabled);
@@ -55,13 +57,6 @@ public class ScanControllerImpl implements ScanController, EMDKManager.EMDKListe
     @Override
     public void onPause() {
         Timber.v("onPause");
-        destroyScanner();
-        releaseEmdkManager(false);
-    }
-
-    @Override
-    public void onDestroy() {
-        Timber.v("onDestroy");
         destroyScanner();
         releaseEmdkManager(true);
     }
@@ -136,6 +131,10 @@ public class ScanControllerImpl implements ScanController, EMDKManager.EMDKListe
 
             config.scanParams.decodeHapticFeedback = true;
             config.scanParams.decodeLEDTime = 1000;
+            config.scanParams.audioStreamType = ScannerConfig.AudioStreamType.RINGER;
+            config.scanParams.decodeAudioFeedbackUri = null;
+            config.scanParams.decodeLEDFeedback = true;
+
             config.readerParams.readerSpecific.imagerSpecific.beamTimer = 300;
             config.readerParams.readerSpecific.laserSpecific.powerMode = ScannerConfig.PowerMode.HIGH;
             config.readerParams.readerSpecific.imagerSpecific.aimingPattern = scannerEnabled ? ScannerConfig.AimingPattern.ON : ScannerConfig.AimingPattern.OFF;
@@ -151,7 +150,7 @@ public class ScanControllerImpl implements ScanController, EMDKManager.EMDKListe
     @Override
     public void onClosed() {
         Timber.v("onClosed");
-        releaseEmdkManager(true);
+        releaseEmdkManager(false);
     }
 
     private void destroyScanner() {
