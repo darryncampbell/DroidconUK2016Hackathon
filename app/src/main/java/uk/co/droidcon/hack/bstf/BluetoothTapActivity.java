@@ -6,8 +6,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ImageView;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
@@ -15,7 +13,6 @@ import uk.co.droidcon.hack.bstf.bluetooth.BluetoothTapController;
 
 public class BluetoothTapActivity extends AppCompatActivity {
 
-    @BindView(R.id.start_game_qr)
     ImageView qrCodeView;
     private BluetoothTapController bluetoothController;
 
@@ -23,7 +20,7 @@ public class BluetoothTapActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bluetooth_tap);
-        ButterKnife.bind(this);
+        qrCodeView = (ImageView) findViewById(R.id.start_game_qr);
 
         bluetoothController = new BluetoothTapController(this);
     }

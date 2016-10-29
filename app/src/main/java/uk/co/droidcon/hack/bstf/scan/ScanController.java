@@ -8,10 +8,15 @@ public interface ScanController {
 
     void onCreate(Context context);
 
+    void onResume();
+
+    void onPause();
+
     void onDestroy();
+
+    Observable observeScanTrigger();
 
     Observable<String> observeScanResults();
 
     void setEnabled(boolean enabled);
-
 }
