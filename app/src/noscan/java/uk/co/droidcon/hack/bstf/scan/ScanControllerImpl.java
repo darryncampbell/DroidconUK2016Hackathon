@@ -11,7 +11,20 @@ public class ScanControllerImpl implements ScanController {
     }
 
     @Override
+    public void onResume() {
+    }
+
+    @Override
+    public void onPause() {
+    }
+
+    @Override
     public void onDestroy() {
+    }
+
+    @Override
+    public Observable observeScanTrigger() {
+        return Observable.empty();
     }
 
     @Override

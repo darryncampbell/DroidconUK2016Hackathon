@@ -8,6 +8,7 @@ buildscript {
         classpath 'com.android.tools.build:gradle:2.2.2'
         classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath 'com.google.gms:google-services:3.0.0'
     }
 }
 
@@ -15,7 +16,7 @@ ext {
     compileSdkVersion = 25
     buildToolsVersion = '25.0.0'
     targetSdkVersion = 25
-    supportVersion = '25.0.0'
+    supportVersion = '24.2.1'
     butterknifeVersion = '8.2.1'
     rxjavaVersion = '1.1.8'
     rxandroidVersion = '1.2.1'

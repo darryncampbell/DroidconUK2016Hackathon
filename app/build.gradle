@@ -13,6 +13,7 @@ android {
         versionCode 1
         versionName "0.0.1"
         buildConfigField "String", "TAG", "\"BSTF_APP\""
+        multiDexEnabled true
     }
 
     buildTypes {
@@ -52,6 +53,7 @@ project.archivesBaseName = "BSTF"
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    compile 'com.android.support:multidex:1.0.1'
     compile "com.android.support:design:${supportVersion}"
     compile "com.android.support:appcompat-v7:${supportVersion}"
 
@@ -64,4 +66,11 @@ dependencies {
 
     provided(name: 'com.symbol.emdk', ext: 'jar')
     compile(name: 'bluetoothtap-2.0.0', ext: 'aar')
+
+    compile 'com.google.firebase:firebase-core:9.8.0'
+    compile 'com.google.firebase:firebase-database:9.8.0'
+
+    compile 'de.hdodenhof:circleimageview:2.1.0'
 }
+
+apply plugin: 'com.google.gms.google-services'

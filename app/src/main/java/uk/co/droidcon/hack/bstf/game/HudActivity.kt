@@ -61,6 +61,17 @@ open class HudActivity : AppCompatActivity() {
                 subscribe { shoot() }
     }
 
+
+    override fun onResume() {
+        scanController.onResume()
+        super.onResume()
+    }
+
+    override fun onPause() {
+        scanController.onPause()
+        super.onPause()
+    }
+
     override fun onDestroy() {
         scanController!!.onDestroy()
         super.onDestroy()
@@ -93,7 +104,7 @@ open class HudActivity : AppCompatActivity() {
 
     protected fun updateUi() {
         ammoCount.text = "" + count
-        text.visibility = if(gunEmpty) View.VISIBLE else View.GONE
+        text.visibility = if (gunEmpty) View.VISIBLE else View.GONE
     }
 
     private fun gunReloaded() {
