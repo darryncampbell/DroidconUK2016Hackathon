@@ -19,6 +19,7 @@ import timber.log.Timber
 import uk.co.droidcon.hack.bstf.BstfComponent
 import uk.co.droidcon.hack.bstf.BstfGameManager
 import uk.co.droidcon.hack.bstf.R
+import uk.co.droidcon.hack.bstf.models.Profile
 import uk.co.droidcon.hack.bstf.reload.battery.BatteryStateReceiver
 import uk.co.droidcon.hack.bstf.scan.ScanController
 import uk.co.droidcon.hack.bstf.scan.ScanControllerImpl
@@ -78,7 +79,7 @@ class GameLoopActivity : AppCompatActivity() {
         val scanSubscription = scanController.observeScanResults()
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe { Timber.d("Game", it.toString()) }
+                .subscribe { parseHit(it) }
 
         val triggersSubscription = scanController.observeScanTrigger()
                 .subscribeOn(Schedulers.computation())
@@ -88,6 +89,17 @@ class GameLoopActivity : AppCompatActivity() {
         subscriptions.add(subscription)
         subscriptions.add(scanSubscription)
         subscriptions.add(triggersSubscription)
+    }
+
+    private fun parseHit(tag: String) {
+        val profile = Profile.getProfileForId(tag)
+        if (profile == null) return
+
+        for (player in gameManager.otherPlayers()) {
+            if (player.name == profile.superHeroName) {
+                gameManager.shoot(player)
+            }
+        }
     }
 
     fun shoot() {
