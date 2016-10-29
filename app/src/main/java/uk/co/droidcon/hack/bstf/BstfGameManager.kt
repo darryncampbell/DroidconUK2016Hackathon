@@ -102,4 +102,17 @@ class BstfGameManager(database: FirebaseDatabase, gameId: Int) : ValueEventListe
     fun observeSyncedState(): Observable<Boolean> {
         return readyObservable.asObservable()
     }
+
+    fun toggleReadyState() {
+        if (me == null) return
+        me!!.isReady = !me!!.isReady
+
+        for (player in gameSession.players!!) {
+            if (player.name == me!!.name) {
+                player.isReady = me!!.isReady
+            }
+        }
+
+        databaseReference.setValue(gameSession)
+    }
 }

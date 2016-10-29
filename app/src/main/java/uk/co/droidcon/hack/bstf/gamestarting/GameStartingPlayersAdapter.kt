@@ -46,30 +46,8 @@ class GameStartingPlayersAdapter : RecyclerView.Adapter<GameStartingPlayersAdapt
 
     fun setPlayers(newPlayers: ArrayList<Player>?) {
         if (newPlayers == null) return
-        val result = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
-            override fun getOldListSize(): Int {
-                return players.size
-            }
-
-            override fun getNewListSize(): Int {
-                return newPlayers.size
-            }
-
-            override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                val old = players[oldItemPosition]
-                val new = newPlayers[newItemPosition]
-                return old.name == new.name
-            }
-
-            override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                val old = players[oldItemPosition]
-                val new = newPlayers[newItemPosition]
-                return old == new
-            }
-        })
-
-        this.players = newPlayers
-        result.dispatchUpdatesTo(this)
+        players = newPlayers
+        notifyDataSetChanged()
     }
 
     inner class GameStartingPlayersViewHolder(view: View) : RecyclerView.ViewHolder(view) {

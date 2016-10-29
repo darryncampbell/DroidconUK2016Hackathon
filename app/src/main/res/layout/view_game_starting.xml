@@ -21,4 +21,12 @@
         android:layout_height="match_parent"
         android:layout_below="@+id/game_starting_game_id" />
 
+    <Button
+        android:id="@+id/game_starting_ready"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:text="Ready" />
+
 </RelativeLayout>

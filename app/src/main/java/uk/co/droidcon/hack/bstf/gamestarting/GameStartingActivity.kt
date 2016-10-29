@@ -5,6 +5,8 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.Toolbar
+import android.view.View
+import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import butterknife.bindView
@@ -19,9 +21,9 @@ import java.util.*
 
 class GameStartingActivity : AppCompatActivity() {
 
-    val toolbar: Toolbar by bindView(R.id.toolbar)
     val gameIdTextView: TextView by bindView(R.id.game_starting_game_id)
     val playersRecyclerView: RecyclerView by bindView(R.id.game_starting_players)
+    val isReadyButton: Button by bindView(R.id.game_starting_ready)
 
     lateinit var gameManager: BstfGameManager
     lateinit var adapter: GameStartingPlayersAdapter
@@ -29,7 +31,6 @@ class GameStartingActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_game_starting)
-        setSupportActionBar(toolbar)
         gameManager = BstfComponent.getBstfGameManager()
 
         gameIdTextView.text = "Game Session " + gameManager.gameSession.id
@@ -52,8 +53,11 @@ class GameStartingActivity : AppCompatActivity() {
                     if (gameManager.me == null) {
                         assignProfile()
                         adapter.me = gameManager.me
+                        isReadyButton.visibility = View.VISIBLE
                     }
                 })
+
+        isReadyButton.setOnClickListener { gameManager.toggleReadyState() }
     }
 
     fun assignProfile() {
@@ -69,6 +73,7 @@ class GameStartingActivity : AppCompatActivity() {
 
         if (availableProfiles.isEmpty()) {
             Toast.makeText(this, "Party is full, sorry :(", Toast.LENGTH_SHORT).show()
+            isReadyButton.visibility = View.GONE
             return
         }
 
