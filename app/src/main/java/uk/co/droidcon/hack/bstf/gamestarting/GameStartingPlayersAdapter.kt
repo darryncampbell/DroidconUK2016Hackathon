@@ -1,5 +1,7 @@
 package uk.co.droidcon.hack.bstf.gamestarting
 
+import android.support.v4.content.ContextCompat
+import android.support.v4.graphics.drawable.DrawableCompat
 import android.support.v7.util.DiffUtil
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
@@ -33,6 +35,9 @@ class GameStartingPlayersAdapter : RecyclerView.Adapter<GameStartingPlayersAdapt
         }
 
         holder.avatarView.setImageResource(profile.avatarId)
+        holder.isReadyView.setImageResource(if (player.isReady) R.drawable.checked else R.drawable.unchecked)
+        val tintColor = if (player.isReady) R.color.colorPrimary else android.R.color.darker_gray
+        DrawableCompat.setTint(holder.isReadyView.drawable, ContextCompat.getColor(holder.itemView.context, tintColor))
     }
 
     override fun getItemCount(): Int {
@@ -71,10 +76,12 @@ class GameStartingPlayersAdapter : RecyclerView.Adapter<GameStartingPlayersAdapt
 
         val nameView: TextView
         val avatarView: ImageView
+        val isReadyView: ImageView
 
         init {
             nameView = view.findViewById(R.id.player_name) as TextView
             avatarView = view.findViewById(R.id.player_avatar) as ImageView
+            isReadyView = view.findViewById(R.id.player_is_ready) as ImageView
         }
     }
 }
