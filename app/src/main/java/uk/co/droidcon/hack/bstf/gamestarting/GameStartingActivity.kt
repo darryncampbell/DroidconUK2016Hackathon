@@ -10,6 +10,7 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import butterknife.bindView
+import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
 import uk.co.droidcon.hack.bstf.BstfComponent
@@ -28,6 +29,8 @@ class GameStartingActivity : AppCompatActivity() {
 
     lateinit var gameManager: BstfGameManager
     lateinit var adapter: GameStartingPlayersAdapter
+    var playersSubscription: Subscription? = null
+    var isReadySubscription: Subscription? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,9 +43,18 @@ class GameStartingActivity : AppCompatActivity() {
         playersRecyclerView.adapter = adapter
         playersRecyclerView.layoutManager = LinearLayoutManager(this)
 
+        isReadyButton.setOnClickListener {
+            gameManager.toggleReadyState()
+            isReadyButton.text = if (gameManager.me!!.isReady) "not ready" else "ready"
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+
         adapter.setPlayers(gameManager.gameSession.players)
 
-        gameManager.observePlayers()
+        playersSubscription = gameManager.observePlayers()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
@@ -52,7 +64,7 @@ class GameStartingActivity : AppCompatActivity() {
                     }
                 })
 
-        gameManager.observeSyncedState()
+        isReadySubscription = gameManager.observeSyncedState()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
@@ -63,11 +75,12 @@ class GameStartingActivity : AppCompatActivity() {
                         isReadyButton.text = if (gameManager.me!!.isReady) "not ready" else "ready"
                     }
                 })
+    }
 
-        isReadyButton.setOnClickListener {
-            gameManager.toggleReadyState()
-            isReadyButton.text = if (gameManager.me!!.isReady) "not ready" else "ready"
-        }
+    override fun onPause() {
+        super.onPause()
+        playersSubscription?.unsubscribe()
+        isReadySubscription?.unsubscribe()
     }
 
     private fun openActiveGame() {
