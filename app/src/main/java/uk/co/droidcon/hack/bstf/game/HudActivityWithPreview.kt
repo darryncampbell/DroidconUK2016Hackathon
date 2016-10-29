@@ -53,6 +53,11 @@ class HudActivityWithPreview : HudActivity(), SurfaceHolder.Callback {
                 shoot()
             }
         }
+
+        cameraPreview.setOnLongClickListener {
+            switchWeapon()
+            true
+        }
     }
 
     override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {

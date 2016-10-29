@@ -9,7 +9,9 @@ import android.support.v4.content.LocalBroadcastManager
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.DefaultItemAnimator
 import android.support.v7.widget.RecyclerView
+import android.text.style.UpdateLayout
 import android.view.View
+import android.widget.ImageView
 import android.widget.TextView
 import butterknife.bindView
 import rx.android.schedulers.AndroidSchedulers
@@ -19,6 +21,7 @@ import uk.co.droidcon.hack.bstf.BstfComponent
 import uk.co.droidcon.hack.bstf.BstfGameManager
 import uk.co.droidcon.hack.bstf.R
 import uk.co.droidcon.hack.bstf.models.Profile
+import uk.co.droidcon.hack.bstf.models.Weapon
 import uk.co.droidcon.hack.bstf.reload.battery.BatteryStateReceiver
 import uk.co.droidcon.hack.bstf.scan.ScanController
 import uk.co.droidcon.hack.bstf.scan.ScanControllerImpl
@@ -32,13 +35,14 @@ class GameLoopActivity : AppCompatActivity() {
 
     val text: TextView by bindView(R.id.info)
     val recycler: RecyclerView by bindView(R.id.recycler)
-    val gunName: View by bindView(R.id.gun_name)
-    val gunImage: View by bindView(R.id.gun_image)
+    val gunName: TextView by bindView(R.id.gun_name)
+    val gunImage: ImageView by bindView(R.id.gun_image)
     val ammoCount: TextView by bindView(R.id.ammo_count)
-    val ammoImage: View by bindView(R.id.ammo_image)
+    val ammoImage: ImageView by bindView(R.id.ammo_image)
 
-    var count = AMMO_COUNT
+    var count = AMMO_COUNT // TODO: up this upon item pickup
     var gunEmpty = false
+    var weapon = Weapon.GLOCK
 
     lateinit var localBroadcastManager: LocalBroadcastManager
     lateinit var soundManager: SoundManager
@@ -69,6 +73,7 @@ class GameLoopActivity : AppCompatActivity() {
         scanController = ScanControllerImpl()
         scanController.onCreate(this)
 
+        updateWeaponUi()
         updateTopUi()
     }
 
@@ -108,7 +113,7 @@ class GameLoopActivity : AppCompatActivity() {
 
     private fun shoot() {
         if (gunEmpty) {
-            soundManager.playSound(SoundManager.EMPTY_POP)
+            soundManager.playSound(weapon.emptySoundId)
             // TODO: animate ammo
             return
         }
@@ -118,7 +123,7 @@ class GameLoopActivity : AppCompatActivity() {
             gunEmpty = true
             scanController.setEnabled(false)
         } else {
-            soundManager.playSound(SoundManager.PISTOL)
+            soundManager.playSound(weapon.shootSoundId)
         }
 
         updateTopUi()
@@ -133,7 +138,14 @@ class GameLoopActivity : AppCompatActivity() {
         -After timeout => undo all stuff */
     }
 
+    protected fun updateWeaponUi() {
+        gunImage.setImageResource(weapon.imageId)
+        gunName.text = weapon.name
+        ammoImage.setImageResource(weapon.ammoImageId)
+    }
+
     private fun gunReloaded() {
+        soundManager.playSound(weapon.reloadSoundId)
         count = AMMO_COUNT
         gunEmpty = false
         scanController.setEnabled(true)
