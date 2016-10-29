@@ -23,7 +23,6 @@ import timber.log.Timber;
 public class ScanControllerImpl implements ScanController, EMDKManager.EMDKListener {
 
     private EMDKManager emdkManager;
-
     private Scanner scanner;
 
     private BehaviorSubject<String> scanResultSubject = BehaviorSubject.create();
@@ -47,6 +46,20 @@ public class ScanControllerImpl implements ScanController, EMDKManager.EMDKListe
     }
 
     @Override
+    public void setEnabled(boolean enabled) {
+        try {
+            if (enabled) {
+                scanner.enable();
+                read();
+            } else {
+                scanner.disable();
+            }
+        } catch (ScannerException e) {
+            Timber.v(e, "cannot enable: %b", enabled);
+        }
+    }
+
+    @Override
     public void onOpened(EMDKManager emdkManager) {
         this.emdkManager = emdkManager;
 
@@ -59,8 +72,7 @@ public class ScanControllerImpl implements ScanController, EMDKManager.EMDKListe
         });
 
         initScanner();
-        enable();
-        read();
+        setEnabled(true);
     }
 
     private void initScanner() {

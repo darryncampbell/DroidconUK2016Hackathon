@@ -19,4 +19,8 @@ public class ScanControllerImpl implements ScanController {
         return Observable.just("no-scan");
     }
 
+    @Override
+    public void setEnabled(boolean enabled) {
+    }
+
 }

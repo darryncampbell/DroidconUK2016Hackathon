@@ -12,4 +12,6 @@ public interface ScanController {
 
     Observable<String> observeScanResults();
 
+    void setEnabled(boolean enabled);
+
 }
