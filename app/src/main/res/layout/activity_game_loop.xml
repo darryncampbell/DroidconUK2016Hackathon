@@ -6,6 +6,70 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/gun_image"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginLeft="32dp"
+            android:layout_marginTop="32dp"
+            android:src="@drawable/glock" />
+
+        <TextView
+            android:id="@+id/gun_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@id/gun_image"
+            android:layout_alignRight="@id/gun_image"
+            android:layout_below="@id/gun_image"
+            android:gravity="left"
+            android:textColor="@android:color/holo_red_dark"
+            android:textSize="26sp"
+            android:textStyle="bold"
+            tools:text="Glock" />
+
+        <ImageView
+            android:id="@+id/ammo_image"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="32dp"
+            android:layout_marginTop="32dp"
+            android:src="@drawable/ammo" />
+
+        <TextView
+            android:id="@+id/ammo_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@id/ammo_image"
+            android:layout_alignRight="@id/ammo_image"
+            android:layout_below="@id/ammo_image"
+            android:gravity="right"
+            android:textColor="@android:color/holo_red_dark"
+            android:textSize="26sp"
+            android:textStyle="bold"
+            tools:text="30" />
+
+        <TextView
+            android:id="@+id/info"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:gravity="right"
+            android:text="RELOAD!!!"
+            android:textColor="@android:color/holo_red_dark"
+            android:textSize="40sp"
+            android:visibility="gone"
+            tools:visibility="visible" />
+    </RelativeLayout>
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recycler"
         android:layout_width="match_parent"
@@ -16,31 +80,5 @@
         android:paddingTop="16dp"
         app:layoutManager="android.support.v7.widget.LinearLayoutManager"
         tools:listitem="@layout/row_player_state" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="8dp">
-
-        <Button
-            android:id="@+id/dev_shoot"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/button__dev_shoot_random" />
-
-        <Space
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1" />
-
-        <Button
-            android:id="@+id/dev_shot"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/button__dev_shot_by_random" />
-
-    </LinearLayout>
-
 
 </LinearLayout>

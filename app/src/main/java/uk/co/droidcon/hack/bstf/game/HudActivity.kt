@@ -63,12 +63,12 @@ open class HudActivity : AppCompatActivity() {
 
 
     override fun onResume() {
-        scanController.onResume()
+        scanController?.onResume()
         super.onResume()
     }
 
     override fun onPause() {
-        scanController.onPause()
+        scanController?.onPause()
         super.onPause()
     }
 

@@ -1,32 +1,61 @@
 package uk.co.droidcon.hack.bstf.gameloop
 
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
+import android.support.v4.content.LocalBroadcastManager
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.DefaultItemAnimator
 import android.support.v7.widget.RecyclerView
-import android.widget.Button
+import android.util.Log
+import android.view.View
+import android.widget.TextView
 import butterknife.bindView
+import rx.android.schedulers.AndroidSchedulers
+import rx.schedulers.Schedulers
 import rx.subscriptions.CompositeSubscription
 import uk.co.droidcon.hack.bstf.BstfComponent
 import uk.co.droidcon.hack.bstf.BstfGameManager
 import uk.co.droidcon.hack.bstf.R
-import uk.co.droidcon.hack.bstf.models.ShotEvent
-import java.util.*
+import uk.co.droidcon.hack.bstf.reload.battery.BatteryStateReceiver
+import uk.co.droidcon.hack.bstf.scan.ScanController
+import uk.co.droidcon.hack.bstf.scan.ScanControllerImpl
+import uk.co.droidcon.hack.bstf.sounds.SoundManager
 
 class GameLoopActivity : AppCompatActivity() {
 
+    companion object {
+        var AMMO_COUNT = 15
+    }
+
+    val text: TextView by bindView(R.id.info)
+    val ammoCount: TextView by bindView(R.id.ammo_count)
+
+    var count = AMMO_COUNT
+    var gunEmpty = false
+
+    lateinit var localBroadcastManager: LocalBroadcastManager
+    lateinit var soundManager: SoundManager
+    val reloadReceiver = ReloadReceiver()
+
     val recycler: RecyclerView by bindView(R.id.recycler)
-    val buttonShoot: Button by bindView(R.id.dev_shoot)
-    val buttonGetShot: Button by bindView(R.id.dev_shot)
 
     val subscriptions = CompositeSubscription()
 
     lateinit var gameManager: BstfGameManager
     lateinit var adapter: PlayerStateAdapter
+    lateinit var scanController: ScanController
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_game_loop)
+
+        soundManager = SoundManager.getInstance(this)
+
+        localBroadcastManager = LocalBroadcastManager.getInstance(this)
+        localBroadcastManager.registerReceiver(reloadReceiver, IntentFilter(BatteryStateReceiver.ACTION_RELOAD))
 
         gameManager = BstfComponent.getBstfGameManager()
         adapter = PlayerStateAdapter()
@@ -36,33 +65,78 @@ class GameLoopActivity : AppCompatActivity() {
         recycler.itemAnimator = DefaultItemAnimator()
 
         gameManager.gameStarted()
+        scanController = ScanControllerImpl()
+        scanController.onCreate(this)
 
-        buttonShoot.setOnClickListener { view ->
-            val manager = BstfComponent.getBstfGameManager()
-            val otherPlayers = manager.otherPlayers()
-            val victim = otherPlayers[Random().nextInt(otherPlayers.size)]
-            manager.shoot(victim)
-        }
-
-        buttonGetShot.setOnClickListener { view ->
-            // Kind of hacky -- but for testing only
-            val manager = BstfComponent.getBstfGameManager()
-            val session = manager.gameSession
-            val otherPlayers = manager.otherPlayers()
-            val criminal = otherPlayers[Random().nextInt(otherPlayers.size)]
-            session.shotsFired!!.add(ShotEvent(criminal, manager.me))
-            manager.databaseReference.setValue(session)
-        }
+        updateAmmoCount()
     }
 
     override fun onResume() {
         super.onResume()
+        scanController.onResume()
         val subscription = gameManager.observePlayerState().subscribe { adapter.updateList(it) }
+        val scanSubscription = scanController.observeScanResults()
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe { Log.d("Game", it.toString()) }
+
+        val triggersSubscription = scanController.observeScanTrigger()
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe { shoot() }
+
         subscriptions.add(subscription)
+        subscriptions.add(scanSubscription)
+        subscriptions.add(triggersSubscription)
+    }
+
+    fun shoot() {
+        if (gunEmpty) {
+            // TODO: empty sound
+            // TODO: animate ammo
+            return
+        }
+
+        count--
+        if (count <= 0) {
+            gunEmpty = true
+            scanController.setEnabled(false)
+        } else {
+            // TODO: improve with soundPool
+            soundManager.playSound(SoundManager.PISTOL)
+        }
+
+        updateAmmoCount()
+    }
+
+    private fun gunReloaded() {
+        soundManager.playSound(SoundManager.RELOAD)
+
+        count = AMMO_COUNT
+        gunEmpty = false
+        scanController.setEnabled(true)
+        updateAmmoCount()
+    }
+
+    fun updateAmmoCount() {
+        ammoCount.text = "" + count
+        text.visibility = if (gunEmpty) View.VISIBLE else View.GONE
     }
 
     override fun onPause() {
-        super.onPause()
+        scanController.onPause()
         subscriptions.clear()
+        super.onPause()
+    }
+
+    override fun onDestroy() {
+        scanController.onDestroy()
+        super.onDestroy()
+    }
+
+    inner class ReloadReceiver() : BroadcastReceiver() {
+        override fun onReceive(p0: Context?, p1: Intent?) {
+            gunReloaded()
+        }
     }
 }
