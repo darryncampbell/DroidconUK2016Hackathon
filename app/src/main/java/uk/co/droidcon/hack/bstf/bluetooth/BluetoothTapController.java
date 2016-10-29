@@ -12,14 +12,15 @@ import rx.subjects.BehaviorSubject;
 import rx.subjects.PublishSubject;
 import timber.log.Timber;
 
-public class BluetoothTapController implements BluetoothTapBeaconService.BeaconServiceListener, BluetoothTapDetector.TouchInListener {
+public class BluetoothTapController implements BluetoothTapBeaconService.BeaconServiceListener, BluetoothTapDetector.TouchInListener, BluetoothTapDetector.BeaconDetailsListener {
 
     private Beacon beacon = new Beacon("BBE1114A-0CDB-433D-B0C3-97AD44F9F639", "C9:E7:D5:12:0B:42", 1000, 1000, -77);
     private PublishSubject<Beacon> beaconSubject = PublishSubject.create();
-    private BehaviorSubject<Boolean> tapDetectionSubject = BehaviorSubject.create();
+    private BehaviorSubject<Beacon> tapDetectionSubject = BehaviorSubject.create();
     private final BluetoothTapBeaconService service;
     private BluetoothTapDetector bluetoothTapDetector;
     private boolean touched;
+    private Beacon lastDiscoveredBeacon;
 
     public BluetoothTapController(Context context) {
         service = BluetoothTapBeaconService.getInstance(context, true);
@@ -27,6 +28,7 @@ public class BluetoothTapController implements BluetoothTapBeaconService.BeaconS
 
         bluetoothTapDetector = new BluetoothTapDetector(context, true);
         bluetoothTapDetector.setTouchInListener(this);
+        bluetoothTapDetector.setBeaconDetailsListener(this);
         bluetoothTapDetector.setAlgorithm(Algorithm.MAGNETIC_THRESHOLD);
         bluetoothTapDetector.setBeacon(beacon);
     }
@@ -35,7 +37,7 @@ public class BluetoothTapController implements BluetoothTapBeaconService.BeaconS
         return beaconSubject.asObservable();
     }
 
-    public Observable<Boolean> observeTapDetection() {
+    public Observable<Beacon> observeTapDetection() {
         return tapDetectionSubject;
     }
 
@@ -58,7 +60,9 @@ public class BluetoothTapController implements BluetoothTapBeaconService.BeaconS
     public void touchInRegistered() {
         Timber.w("touchInRegistered");
         touched = !touched;
-        tapDetectionSubject.onNext(touched);
+        if (lastDiscoveredBeacon != null) {
+            tapDetectionSubject.onNext(lastDiscoveredBeacon);
+        }
     }
 
     @Override
@@ -70,4 +74,33 @@ public class BluetoothTapController implements BluetoothTapBeaconService.BeaconS
 //        Timber.w("updateTouchInProgress: %d", progress);
     }
 
+    @Override
+    public void magnitudeChanged(double v) {
+
+    }
+
+    @Override
+    public void ambientChanged(double v) {
+
+    }
+
+    @Override
+    public void thresholdChanged(double v) {
+
+    }
+
+    @Override
+    public void magneticFieldChanged(double v) {
+
+    }
+
+    @Override
+    public void rateChanged(double v) {
+
+    }
+
+    @Override
+    public void beaconDiscovered(Beacon beacon, boolean b) {
+        lastDiscoveredBeacon = beacon;
+    }
 }
