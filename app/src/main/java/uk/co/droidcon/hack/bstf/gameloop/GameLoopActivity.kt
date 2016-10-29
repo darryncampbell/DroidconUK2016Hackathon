@@ -38,6 +38,7 @@ class GameLoopActivity : AppCompatActivity() {
     val ammoImage: View by bindView(R.id.ammo_image)
 
     var count = AMMO_COUNT
+    var available = AMMO_COUNT * 5;
     var gunEmpty = false
 
     lateinit var localBroadcastManager: LocalBroadcastManager
@@ -132,10 +133,19 @@ class GameLoopActivity : AppCompatActivity() {
     }
 
     private fun gunReloaded() {
-        count = AMMO_COUNT
+        if (available <= 0) return
+
+        val deducted = Math.min(available, AMMO_COUNT)
+        available -= deducted
+        count += deducted
+
         gunEmpty = false
         scanController.setEnabled(true)
         updateTopUi()
+    }
+
+    private fun availableIncremented(inc: Int) {
+        available += inc
     }
 
     fun updateTopUi() {
