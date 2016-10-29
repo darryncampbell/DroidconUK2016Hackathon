@@ -14,14 +14,20 @@ import com.symbol.emdk.barcode.ScannerInfo.DecoderType;
 import com.symbol.emdk.barcode.ScannerInfo.DeviceType;
 import com.symbol.emdk.barcode.StatusData;
 
+import java.util.ArrayList;
+
+import rx.Observable;
+import rx.subjects.BehaviorSubject;
 import timber.log.Timber;
 
-public class ScanController implements EMDKManager.EMDKListener {
+public class ScanControllerImpl implements ScanController, EMDKManager.EMDKListener {
 
     private EMDKManager emdkManager;
-
     private Scanner scanner;
 
+    private BehaviorSubject<String> scanResultSubject = BehaviorSubject.create();
+
+    @Override
     public void onCreate(Context context) {
         final EMDKResults results = EMDKManager.getEMDKManager(context, this);
         if (results.statusCode != EMDKResults.STATUS_CODE.SUCCESS) {
@@ -29,8 +35,28 @@ public class ScanController implements EMDKManager.EMDKListener {
         }
     }
 
+    @Override
     public void onDestroy() {
         releaseEmdkManager();
+    }
+
+    @Override
+    public Observable<String> observeScanResults() {
+        return scanResultSubject.asObservable();
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        try {
+            if (enabled) {
+                scanner.enable();
+                read();
+            } else {
+                scanner.disable();
+            }
+        } catch (ScannerException e) {
+            Timber.v(e, "cannot enable: %b", enabled);
+        }
     }
 
     @Override
@@ -46,8 +72,7 @@ public class ScanController implements EMDKManager.EMDKListener {
         });
 
         initScanner();
-        enable();
-        read();
+        setEnabled(true);
     }
 
     private void initScanner() {
@@ -56,6 +81,10 @@ public class ScanController implements EMDKManager.EMDKListener {
             @Override
             public void onData(ScanDataCollection scanDataCollection) {
                 Timber.v("onData: %s", scanDataCollection.getFriendlyName());
+                ArrayList<ScanDataCollection.ScanData> scanData = scanDataCollection.getScanData();
+                for (ScanDataCollection.ScanData data : scanData) {
+                    scanResultSubject.onNext(data.getData());
+                }
             }
         });
 

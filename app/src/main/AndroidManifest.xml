@@ -14,7 +14,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        tools:replace="allowBackup">
+        tools:replace="android:allowBackup">
 
         <activity android:name=".game.HudActivity">
             <intent-filter>
@@ -24,7 +24,8 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".reload.battery.ReloadBatteryTestActivity"
+        <activity
+            android:name=".reload.battery.ReloadBatteryTestActivity"
             android:label="BSTF BatteryReload Test">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -34,7 +35,7 @@
         </activity>
 
         <activity android:name=".game.HudActivityWithPreview"
-            android:label="BSTF HUD AR">
+            android:label="BSTF AR">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

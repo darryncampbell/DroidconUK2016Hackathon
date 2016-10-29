@@ -61,7 +61,7 @@ dependencies {
     compile "io.reactivex:rxjava:$rxjavaVersion"
 
     compile "com.jakewharton.timber:timber:${timberVersion}"
-    //provided fileTree(include: ['com.symbol.emdk.jar'], dir: '../libs')
+
     provided(name: 'com.symbol.emdk', ext: 'jar')
     compile(name: 'bluetoothtap-2.0.0', ext: 'aar')
 }
