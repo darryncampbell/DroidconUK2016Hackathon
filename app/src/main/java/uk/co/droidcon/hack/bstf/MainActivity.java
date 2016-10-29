@@ -15,8 +15,6 @@ import uk.co.droidcon.hack.bstf.models.Player;
 public class MainActivity extends AppCompatActivity {
 
     @BindView(R.id.toolbar) Toolbar toolbar;
-    @BindView(R.id.player_name)
-    EditText playerNameEditText;
 
     private BstfGameManager bstfGameManager;
 
@@ -29,15 +27,4 @@ public class MainActivity extends AppCompatActivity {
 
         bstfGameManager = new BstfGameManager(FirebaseDatabase.getInstance(), 1);
         bstfGameManager.startGame();
-    }
-
-    @OnClick(R.id.player_add)
-    public void onAddPlayerClick() {
-        String name = playerNameEditText.getText().toString();
-        if (name.equals("")) {
-            return;
-        }
-
-        bstfGameManager.setPlayer(new Player(name));
-    }
-}
+    }}
