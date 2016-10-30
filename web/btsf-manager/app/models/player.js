@@ -20,5 +20,17 @@ export default Ember.Object.extend({
     if (name === 'Zebra') {
       return this.urlPrefix + 'avatar_zebra.jpg'
     }
+  }),
+
+  kills: Ember.computed('shotsFired', function() {
+    return this.get('shotsFired').filterBy('source.name', this.get('name')).length;
+  }),
+
+  deaths: Ember.computed('shotsFired', function() {
+    return this.get('shotsFired').filterBy('target.name', this.get('name')).length;
+  }),
+
+  score: Ember.computed('kills', 'deaths', function () {
+    return this.get('kills') - this.get('deaths');
   })
 });

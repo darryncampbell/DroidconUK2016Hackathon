@@ -27,20 +27,6 @@ export default Ember.Controller.extend({
       let snapshotValue = snapshot.val();
       console.log(snapshotValue);
 
-      let players = Ember.A();
-
-      if (!snapshotValue.players) {
-        snapshotValue.players = [];
-      }
-
-      for (let i = 0; i < snapshotValue.players.length; i++) {
-        if (!snapshotValue.players[i]) {
-          continue;
-        }
-
-        players.pushObject(Player.create(snapshotValue.players[i]));
-      }
-
       let shotsFired = Ember.A();
 
       if (!snapshotValue.shotsFired) {
@@ -56,6 +42,22 @@ export default Ember.Controller.extend({
       }
 
       shotsFired = self.sortAndFilterEvents(shotsFired);
+
+      let players = Ember.A();
+
+      if (!snapshotValue.players) {
+        snapshotValue.players = [];
+      }
+
+      for (let i = 0; i < snapshotValue.players.length; i++) {
+        if (!snapshotValue.players[i]) {
+          continue;
+        }
+
+        let player = Player.create(snapshotValue.players[i]);
+        player.set('shotsFired', shotsFired);
+        players.pushObject(player);
+      }
 
       self.set('model', Ember.Object.create(snapshotValue));
       self.set('model.players', players);
