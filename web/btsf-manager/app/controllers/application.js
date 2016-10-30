@@ -68,7 +68,12 @@ export default Ember.Controller.extend({
     let sortedByTime = shotsFired.sortBy('millis');
     let count = shotsFired.length > 10 ? 10 : shotsFired.length;
 
+    if (count === 1) {
+      return shotsFired;
+    }
+
     let result = Ember.A();
+
     for (let index = count - 1; index != 0; index--) {
       result.pushObject(sortedByTime[index]);
     }

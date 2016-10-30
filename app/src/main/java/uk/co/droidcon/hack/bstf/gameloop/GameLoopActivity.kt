@@ -31,6 +31,7 @@ import uk.co.droidcon.hack.bstf.reload.battery.BatteryStateReceiver
 import uk.co.droidcon.hack.bstf.scan.ScanController
 import uk.co.droidcon.hack.bstf.scan.ScanControllerImpl
 import uk.co.droidcon.hack.bstf.sounds.SoundManager
+import java.lang.Math.min
 
 class GameLoopActivity : AppCompatActivity() {
 
@@ -217,7 +218,7 @@ class GameLoopActivity : AppCompatActivity() {
         if (available <= 0) return
         soundManager.playSound(weapon.reloadSoundId)
 
-        val deducted = Math.min(available, AMMO_COUNT)
+        val deducted = min(min(available, AMMO_COUNT), AMMO_COUNT - count)
         available -= deducted
         count += deducted
 
