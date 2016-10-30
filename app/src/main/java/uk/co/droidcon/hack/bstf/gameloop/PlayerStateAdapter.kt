@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import com.bumptech.glide.Glide
 import uk.co.droidcon.hack.bstf.BstfComponent
 import uk.co.droidcon.hack.bstf.R
 import uk.co.droidcon.hack.bstf.gameloop.PlayerStateAdapter.RowViewHolder
@@ -54,7 +55,7 @@ class PlayerStateAdapter : RecyclerView.Adapter<RowViewHolder>() {
                 state.player.timesKilledBy(playerMe))
 
         holder.nameView.text = state.player.name
-        holder.avatarView.setImageResource(profile.avatarId)
+        Glide.with(holder.avatarView.context).load(profile.avatarId).into(holder.avatarView)
         holder.summaryView.text = summaryText
         holder.relativeSummaryView.text = relativeSummaryText
 
