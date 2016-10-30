@@ -8,6 +8,7 @@ import android.support.annotation.NonNull;
 import java.util.List;
 
 import timber.log.Timber;
+import uk.co.droidcon.hack.bstf.R;
 import uk.co.droidcon.hack.bstf.models.Weapon;
 
 @SuppressWarnings("deprecation")
@@ -16,6 +17,9 @@ public class SoundManager {
     private static SoundManager _instance;
 
     private SoundPool soundPool;
+
+    private int painSoundId;
+    private int deadSoundId;
 
     private SoundManager(@NonNull final Context context) {
         soundPool = new SoundPool(4, AudioManager.STREAM_MUSIC, 0);
@@ -29,6 +33,17 @@ public class SoundManager {
             weapon.setEmptySoundId(emptyId);
             weapon.setReloadSoundId(reloadId);
         }
+
+        painSoundId = soundPool.load(context, R.raw.pain, 1);
+        deadSoundId = soundPool.load(context, R.raw.dead, 1);
+    }
+
+    public int getPainSoundId() {
+        return painSoundId;
+    }
+
+    public int getDeadSoundId() {
+        return deadSoundId;
     }
 
     public static SoundManager getInstance(@NonNull final Context context) {

@@ -21,6 +21,7 @@ import uk.co.droidcon.hack.bstf.reload.battery.BatteryStateReceiver
 import uk.co.droidcon.hack.bstf.scan.ScanController
 import uk.co.droidcon.hack.bstf.scan.ScanControllerImpl
 import uk.co.droidcon.hack.bstf.sounds.SoundManager
+import java.lang.Math.min
 
 open class HudActivity : AppCompatActivity() {
 
@@ -37,7 +38,7 @@ open class HudActivity : AppCompatActivity() {
     protected var soundManager: SoundManager? = null
     protected val reloadReceiver = ReloadReceiver()
 
-    internal var scanController: ScanController? = null
+    lateinit var scanController: ScanController
     internal var nfcItemController: NfcItemController? = null
 
     val text: TextView by bindView(R.id.info)
@@ -51,6 +52,7 @@ open class HudActivity : AppCompatActivity() {
         setContentView(R.layout.hud)
 
         soundManager = SoundManager.getInstance(this)
+        scanController = ScanControllerImpl.getInstance()
 
         setupScanController()
         setupNfcItemController()
@@ -67,8 +69,7 @@ open class HudActivity : AppCompatActivity() {
     }
 
     open fun setupScanController() {
-        scanController = ScanControllerImpl.getInstance()
-        scanController!!.observeScanTrigger().
+        scanController.observeScanTrigger().
                 subscribeOn(Schedulers.computation()).
                 observeOn(AndroidSchedulers.mainThread()).
                 subscribe { shoot() }
@@ -106,11 +107,13 @@ open class HudActivity : AppCompatActivity() {
 
     override fun onResume() {
         nfcItemController?.onResume(this)
+        scanController.onResume(this)
         super.onResume()
     }
 
     override fun onPause() {
         nfcItemController?.onPause(this)
+        scanController.onPause()
         super.onPause()
     }
 
@@ -141,7 +144,7 @@ open class HudActivity : AppCompatActivity() {
         count--
         if (count <= 0) {
             gunEmpty = true
-            scanController!!.setMode(ScanController.Mode.OFF)
+            scanController.setMode(ScanController.Mode.OFF)
         } else {
             soundManager?.playSound(weapon.shootSoundId)
         }
@@ -172,12 +175,12 @@ open class HudActivity : AppCompatActivity() {
         if (available <= 0) return
         soundManager?.playSound(weapon.reloadSoundId)
 
-        val deducted = Math.min(available, GameLoopActivity.AMMO_COUNT)
+        val deducted = min(min(available, GameLoopActivity.AMMO_COUNT), GameLoopActivity.AMMO_COUNT - count)
         available -= deducted
         count += deducted
 
         gunEmpty = false
-        scanController?.setMode(ScanController.Mode.HIGH)
+        scanController.setMode(ScanController.Mode.HIGH)
         updateTopUi()
     }
 

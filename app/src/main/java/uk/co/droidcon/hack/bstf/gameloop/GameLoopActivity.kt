@@ -29,8 +29,9 @@ import uk.co.droidcon.hack.bstf.models.ShotEvent
 import uk.co.droidcon.hack.bstf.models.Weapon
 import uk.co.droidcon.hack.bstf.reload.battery.BatteryStateReceiver
 import uk.co.droidcon.hack.bstf.scan.ScanController
-import uk.co.droidcon.hack.bstf.scan.ScanControllerImpl
 import uk.co.droidcon.hack.bstf.sounds.SoundManager
+import java.lang.Math.min
+import java.util.*
 
 class GameLoopActivity : AppCompatActivity() {
 
@@ -69,12 +70,14 @@ class GameLoopActivity : AppCompatActivity() {
     lateinit var adapter: PlayerStateAdapter
     lateinit var scanController: ScanController
     lateinit var nfcItemController: NfcItemController
+    lateinit var random: Random
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_game_loop)
 
         soundManager = SoundManager.getInstance(this)
+        scanController = ScanControllerImpl.getInstance()
 
         localBroadcastManager = LocalBroadcastManager.getInstance(this)
         localBroadcastManager.registerReceiver(reloadReceiver, IntentFilter(BatteryStateReceiver.ACTION_RELOAD))
@@ -87,10 +90,11 @@ class GameLoopActivity : AppCompatActivity() {
         recycler.itemAnimator = DefaultItemAnimator()
 
         gameManager.gameStarted()
-        scanController = ScanControllerImpl.getInstance()
 
         nfcItemController = NfcItemController()
         nfcItemController.setupNfcAdapter(this, this.javaClass)
+
+        random = Random(1337)
 
         updateWeaponUi()
         updateTopUi()
@@ -98,13 +102,13 @@ class GameLoopActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        scanController.onResume(this)
         nfcItemController.onResume(this)
+
         val subscription = gameManager.observePlayerState()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe {
-                    adapter.updateList(it)
-                    if (!gameManager.amIAlive()) iAmKilled()
-                }
+                .subscribe { adapter.updateList(it) }
+
         val scanSubscription = scanController.observeScanResults()
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -202,8 +206,8 @@ class GameLoopActivity : AppCompatActivity() {
     }
 
     private fun iAmKilled() {
-        // TODO Pieter
-//        soundManager.playSound(SoundManager.DEATH)
+        var randomDeathSound = random.nextInt(9) % 2 == 0
+        soundManager.playSound(if (randomDeathSound) soundManager.painSoundId else soundManager.deadSoundId)
         deathStateSwitcher.displayedChild = 1
     }
 
@@ -217,7 +221,7 @@ class GameLoopActivity : AppCompatActivity() {
         if (available <= 0) return
         soundManager.playSound(weapon.reloadSoundId)
 
-        val deducted = Math.min(available, AMMO_COUNT)
+        val deducted = min(min(available, AMMO_COUNT), AMMO_COUNT - count)
         available -= deducted
         count += deducted
 
@@ -259,6 +263,7 @@ class GameLoopActivity : AppCompatActivity() {
 
     override fun onPause() {
         nfcItemController.onPause(this)
+        scanController.onPause()
         subscriptions.clear()
         super.onPause()
     }
