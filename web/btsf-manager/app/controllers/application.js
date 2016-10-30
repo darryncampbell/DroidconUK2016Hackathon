@@ -41,8 +41,6 @@ export default Ember.Controller.extend({
         shotsFired.pushObject(ShotEvent.create(snapshotValue.shotsFired[i]));
       }
 
-      shotsFired = self.sortAndFilterEvents(shotsFired);
-
       let players = Ember.A();
 
       if (!snapshotValue.players) {
@@ -59,25 +57,27 @@ export default Ember.Controller.extend({
         players.pushObject(player);
       }
 
+      shotsFired = self.sortAndFilterEvents(shotsFired);
+
       self.set('model', Ember.Object.create(snapshotValue));
-      self.set('model.players', players);
+      self.set('model.players', self.sortPlayers(players));
       self.set('model.shotsFired', shotsFired);
     });
   },
 
   sortAndFilterEvents: function (shotsFired) {
-    if (shotsFired.length == 0) return shotsFired;
-    let sortedByTime = shotsFired.sortBy('millis');
-    let count = shotsFired.length > 10 ? 10 : shotsFired.length;
+    if (shotsFired.length ==0) return shotsFired;
+    return Ember.A(shotsFired.toArray().reverse());
+  },
 
-    if (count === 1) {
-      return shotsFired;
-    }
+  sortPlayers: function (players) {
+    if (players.length === 0) return players;
 
+    let sortedByScore = players.sortBy('score');
     let result = Ember.A();
 
-    for (let index = count - 1; index != 0; index--) {
-      result.pushObject(sortedByTime[index]);
+    for (let index = sortedByScore.length - 1; index != -1; index--) {
+      result.pushObject(sortedByScore[index]);
     }
 
     return result;
@@ -97,5 +97,10 @@ export default Ember.Controller.extend({
 
       this.get('databaseReference').set(gameSession);
     }
-  }
+  },
+
+  anyPlayers: Ember.computed('model.players', function () {
+    let players = this.get('model.players');
+    return players && players.length > 0;
+  })
 })

@@ -23,17 +23,21 @@
 
           <div class="row">
               <div class="col-md-6">
-                {{#md-collection content=model.players as |player|}}
-                    <div class='collection-item avatar'>
-                        <div class="circle green mdi-action-favorite">
-                            <img style="height: 42px" src="{{player.avatarUrl}}" align="middle">
-                        </div>
+                {{#if anyPlayers}}
+                  {{#md-collection content=model.players as |player|}}
+                      <div class='collection-item avatar'>
+                          <div class="circle green mdi-action-favorite">
+                              <img style="height: 42px" src="{{player.avatarUrl}}" align="middle">
+                          </div>
 
-                        <p>{{player.name}}</p>
-                        <p>is {{#if player.ready}}ready{{else}}not ready{{/if}} to play!</p>
-                        <p>{{player.name}} has <b>{{player.kills}}</b> kills and <b>{{player.deaths}}</b> deaths. His score is <b>{{player.score}}</b></p>
-                    </div>
-                {{/md-collection}}
+                          <p>{{player.name}} is {{#if player.ready}}ready{{else}}not ready{{/if}} to play!</p>
+                          <p>{{player.name}} has <b>{{player.kills}}</b> kills and <b>{{player.deaths}}</b> deaths. His
+                              score is <b>{{player.score}}</b></p>
+                      </div>
+                  {{/md-collection}}
+                {{else}}
+                    <p>No players yet :(</p>
+                {{/if}}
               </div>
               <div class="col-md-6">
                 {{#each model.shotsFired as |shotEvent|}}
