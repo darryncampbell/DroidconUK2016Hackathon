@@ -21,12 +21,12 @@ class BstfGameManager(database: FirebaseDatabase, gameId: String) : ValueEventLi
     var isSynced: Boolean = false
     private val readySubject: BehaviorSubject<Boolean> = BehaviorSubject.create()
     private val playersSubject: PublishSubject<ArrayList<Player>> = PublishSubject.create()
-    private val shotsFiredSubject: PublishSubject<ArrayList<ShotEvent>> = PublishSubject.create();
+    private val shotsFiredSubject: PublishSubject<ArrayList<ShotEvent>> = PublishSubject.create()
 
     companion object {
         val TAG = BstfGameManager::class.java.simpleName
         val REFERENCE_GAME_SESSIONS = "game_session_"
-        val RESPAWN_DURATION_MILLIS : Long = 20000
+        val RESPAWN_DURATION_MILLIS: Long = 2000
     }
 
     override fun onCancelled(databaseError: DatabaseError?) {

@@ -243,6 +243,8 @@ class GameLoopActivity : AppCompatActivity() {
             // Already revealed
             killerRevealSwitcher.displayedChild = 1
         } else {
+            killerRevealSwitcher.displayedChild = 0
+            killerRevealSwitcher.removeCallbacks(revealKillerCommand)
             killerRevealSwitcher.postDelayed(revealKillerCommand, timeUntilReveal)
         }
     }

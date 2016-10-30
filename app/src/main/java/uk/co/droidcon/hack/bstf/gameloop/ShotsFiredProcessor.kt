@@ -7,30 +7,27 @@ import uk.co.droidcon.hack.bstf.models.ShotEvent
 
 
 fun BstfGameManager.observeDeathState(): Observable<ShotEvent>
-//        = observeShotsFired()
-//                .map { it.lastOrNull() { event -> event.target == me!! } }
-//                .filter { it?.isRespawning() ?: false }
-//                .map { it!! }
-        = Observable.never()
+        = observeShotsFired()
+                .map { it.lastOrNull() { event -> event.target == me!! } }
+                .filter { it?.isRespawning() ?: false }
+                .map { it!! }
 
 fun BstfGameManager.observeDeathEvent(): Observable<ShotEvent>
-//        = observeDeathState().distinctUntilChanged()
-        = Observable.never()
+        = observeDeathState().distinctUntilChanged()
 
 
 fun BstfGameManager.observeRespawnTime(): Observable<Pair<ShotEvent, Long>>
-//        = observeDeathState().map { Pair(it, it.remainingRespawnTime()) }
-        = Observable.never()
+        = observeDeathState().map { Pair(it, it.remainingRespawnTime()) }
 
 
-fun BstfGameManager.canShoot(target: Player): Boolean =
+fun BstfGameManager.isRespawning(target: Player): Boolean =
         gameSession.shotsFired!!
                 .lastOrNull { it.target == target }
-                ?.isRespawning() ?: true
+                ?.isRespawning() ?: false
 
 
 fun BstfGameManager.shoot(target: Player): Boolean {
-    val willShoot = true
+    val willShoot = !isRespawning(target)
     if (willShoot) {
         gameSession.shotsFired!!.add(ShotEvent(me!!, target, System.currentTimeMillis()))
         databaseReference.setValue(gameSession)
