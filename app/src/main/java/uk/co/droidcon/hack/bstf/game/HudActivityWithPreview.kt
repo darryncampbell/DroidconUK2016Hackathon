@@ -45,9 +45,7 @@ class HudActivityWithPreview : HudActivity(), SurfaceHolder.Callback {
     override fun setupShooting() {
         super.setupShooting()
         cameraPreview.setOnClickListener {
-            if (!gunEmpty) {
-                shoot()
-            }
+            shoot()
         }
 
         cameraPreview.setOnLongClickListener {
