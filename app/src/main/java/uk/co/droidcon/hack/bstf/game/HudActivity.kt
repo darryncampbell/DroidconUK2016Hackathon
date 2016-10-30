@@ -15,6 +15,7 @@ import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
 import uk.co.droidcon.hack.bstf.NfcItemController
 import uk.co.droidcon.hack.bstf.R
+import uk.co.droidcon.hack.bstf.gameloop.GameLoopActivity
 import uk.co.droidcon.hack.bstf.models.Weapon
 import uk.co.droidcon.hack.bstf.reload.battery.BatteryStateReceiver
 import uk.co.droidcon.hack.bstf.scan.ScanController
@@ -28,6 +29,7 @@ open class HudActivity : AppCompatActivity() {
     }
 
     protected var count = AMMO_COUNT
+    protected var available = AMMO_COUNT * 5
     protected var gunEmpty = false
     protected var weapon = Weapon.LASER
 
@@ -77,8 +79,7 @@ open class HudActivity : AppCompatActivity() {
             NfcItemController.Item.LASER -> switchToWeapon(Weapon.LASER)
             NfcItemController.Item.GLOCK -> switchToWeapon(Weapon.GLOCK)
             NfcItemController.Item.AMMO -> {
-                count = AMMO_COUNT
-                gunEmpty = false
+                availableIncremented(AMMO_COUNT)
                 updateWeaponUi()
                 updateTopUi()
             }
@@ -154,8 +155,12 @@ open class HudActivity : AppCompatActivity() {
         ammoImage.setImageResource(weapon.ammoImageId)
     }
 
+    private fun availableIncremented(inc: Int) {
+        available += inc
+    }
+
     protected fun updateTopUi() {
-        ammoCount.text = "" + count
+        ammoCount.text = count.toString() + " / " + available
         text.visibility = if (gunEmpty) View.VISIBLE else View.GONE
         gunName.visibility = if (gunEmpty) View.GONE else View.VISIBLE
         gunImage.visibility = if (gunEmpty) View.GONE else View.VISIBLE
@@ -164,8 +169,13 @@ open class HudActivity : AppCompatActivity() {
     }
 
     private fun gunReloaded() {
+        if (available <= 0) return
         soundManager?.playSound(weapon.reloadSoundId)
-        count = AMMO_COUNT
+
+        val deducted = Math.min(available, GameLoopActivity.AMMO_COUNT)
+        available -= deducted
+        count += deducted
+
         gunEmpty = false
         scanController?.setEnabled(true)
         updateTopUi()

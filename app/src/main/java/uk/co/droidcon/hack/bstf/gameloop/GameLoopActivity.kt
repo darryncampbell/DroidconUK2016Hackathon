@@ -42,7 +42,7 @@ class GameLoopActivity : AppCompatActivity() {
     val ammoImage: ImageView by bindView(R.id.ammo_image)
 
     var count = AMMO_COUNT
-    var available = AMMO_COUNT * 5;
+    var available = AMMO_COUNT * 5
     var gunEmpty = false
     var weapon = Weapon.GLOCK
 
@@ -127,8 +127,7 @@ class GameLoopActivity : AppCompatActivity() {
             NfcItemController.Item.LASER -> switchToWeapon(Weapon.LASER)
             NfcItemController.Item.GLOCK -> switchToWeapon(Weapon.GLOCK)
             NfcItemController.Item.AMMO -> {
-                count = AMMO_COUNT
-                gunEmpty = false
+                availableIncremented(AMMO_COUNT)
                 updateWeaponUi()
                 updateTopUi()
             }
@@ -194,7 +193,7 @@ class GameLoopActivity : AppCompatActivity() {
     }
 
     fun updateTopUi() {
-        ammoCount.text = "" + count
+        ammoCount.text = count.toString() + " / " + available
         text.visibility = if (gunEmpty) View.VISIBLE else View.GONE
         gunName.visibility = if (gunEmpty) View.GONE else View.VISIBLE
         gunImage.visibility = if (gunEmpty) View.GONE else View.VISIBLE
