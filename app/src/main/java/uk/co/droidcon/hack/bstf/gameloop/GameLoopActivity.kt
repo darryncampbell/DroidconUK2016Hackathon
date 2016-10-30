@@ -29,10 +29,9 @@ import uk.co.droidcon.hack.bstf.models.ShotEvent
 import uk.co.droidcon.hack.bstf.models.Weapon
 import uk.co.droidcon.hack.bstf.reload.battery.BatteryStateReceiver
 import uk.co.droidcon.hack.bstf.scan.ScanController
-import uk.co.droidcon.hack.bstf.scan.ScanControllerImpl
 import uk.co.droidcon.hack.bstf.sounds.SoundManager
-import java.util.*
 import java.lang.Math.min
+import java.util.*
 
 class GameLoopActivity : AppCompatActivity() {
 
@@ -104,12 +103,11 @@ class GameLoopActivity : AppCompatActivity() {
         super.onResume()
         scanController.onResume(this)
         nfcItemController.onResume(this)
+
         val subscription = gameManager.observePlayerState()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe {
-                    adapter.updateList(it)
-                    if (!gameManager.amIAlive()) iAmKilled()
-                }
+                .subscribe { adapter.updateList(it) }
+
         val scanSubscription = scanController.observeScanResults()
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
