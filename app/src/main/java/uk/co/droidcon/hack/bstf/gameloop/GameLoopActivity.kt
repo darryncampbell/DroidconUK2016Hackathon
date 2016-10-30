@@ -46,8 +46,8 @@ class GameLoopActivity : AppCompatActivity() {
     val ammoImage: ImageView by bindView(R.id.ammo_image)
 
     val deathStateSwitcher: ViewAnimator by bindView(R.id.loop_death_switcher)
-    val killedByView: TextView by bindView(R.id.killed_by)
-    val killerWhoView: TextView by bindView(R.id.question_mark)
+    val killedByView: TextView by bindView(R.id.killed_by) // TODO animate if time
+    val killerWhoView: TextView by bindView(R.id.question_mark) // TODO animate if time
     val killerRevealSwitcher: ViewAnimator by bindView(R.id.killer_reveal)
     val killerImage: ImageView by bindView(R.id.killer_image)
 
