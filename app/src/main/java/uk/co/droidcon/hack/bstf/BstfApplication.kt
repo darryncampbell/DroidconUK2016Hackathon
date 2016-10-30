@@ -20,7 +20,7 @@ class BstfApplication : MultiDexApplication() {
         MultiDex.install(this)
 
         // TODO init game manager by tap
-        BstfComponent.setBstfGameManager(BstfGameManager(FirebaseDatabase.getInstance(), 2))
+        BstfComponent.setBstfGameManager(BstfGameManager(FirebaseDatabase.getInstance(), "a"))
 
         Timber.plant(Timber.DebugTree())
 

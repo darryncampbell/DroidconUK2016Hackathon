@@ -12,7 +12,7 @@ import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.ViewSwitcher
+import android.widget.ViewAnimator
 import butterknife.bindView
 import com.bumptech.glide.Glide
 import rx.android.schedulers.AndroidSchedulers
@@ -20,10 +20,13 @@ import rx.schedulers.Schedulers
 import rx.subscriptions.CompositeSubscription
 import uk.co.droidcon.hack.bstf.BstfComponent
 import uk.co.droidcon.hack.bstf.BstfGameManager
+import uk.co.droidcon.hack.bstf.NfcItemController
 import uk.co.droidcon.hack.bstf.R
+import uk.co.droidcon.hack.bstf.game.HudActivity
 import uk.co.droidcon.hack.bstf.models.Player
 import uk.co.droidcon.hack.bstf.models.Profile
 import uk.co.droidcon.hack.bstf.models.ShotEvent
+import uk.co.droidcon.hack.bstf.models.Weapon
 import uk.co.droidcon.hack.bstf.reload.battery.BatteryStateReceiver
 import uk.co.droidcon.hack.bstf.scan.ScanController
 import uk.co.droidcon.hack.bstf.scan.ScanControllerImpl
@@ -37,15 +40,15 @@ class GameLoopActivity : AppCompatActivity() {
 
     val text: TextView by bindView(R.id.info)
     val recycler: RecyclerView by bindView(R.id.recycler)
-    val gunName: View by bindView(R.id.gun_name)
-    val gunImage: View by bindView(R.id.gun_image)
+    val gunName: TextView by bindView(R.id.gun_name)
+    val gunImage: ImageView by bindView(R.id.gun_image)
     val ammoCount: TextView by bindView(R.id.ammo_count)
-    val ammoImage: View by bindView(R.id.ammo_image)
+    val ammoImage: ImageView by bindView(R.id.ammo_image)
 
-    val deathStateSwitcher: ViewSwitcher by bindView(R.id.loop_death_switcher)
+    val deathStateSwitcher: ViewAnimator by bindView(R.id.loop_death_switcher)
     val killedByView: TextView by bindView(R.id.killed_by)
     val killerWhoView: TextView by bindView(R.id.question_mark)
-    val killerRevealSwitcher: ViewSwitcher by bindView(R.id.killer_reveal)
+    val killerRevealSwitcher: ViewAnimator by bindView(R.id.killer_reveal)
     val killerImage: ImageView by bindView(R.id.killer_image)
 
 
@@ -55,7 +58,9 @@ class GameLoopActivity : AppCompatActivity() {
     val revealKillerCommand = RevealCommand()
 
     var count = AMMO_COUNT
+    var available = AMMO_COUNT * 5
     var gunEmpty = false
+    var weapon = Weapon.GLOCK
 
     lateinit var localBroadcastManager: LocalBroadcastManager
     lateinit var soundManager: SoundManager
@@ -63,6 +68,7 @@ class GameLoopActivity : AppCompatActivity() {
     lateinit var gameManager: BstfGameManager
     lateinit var adapter: PlayerStateAdapter
     lateinit var scanController: ScanController
+    lateinit var nfcItemController: NfcItemController
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -83,11 +89,16 @@ class GameLoopActivity : AppCompatActivity() {
         gameManager.gameStarted()
         scanController = ScanControllerImpl.getInstance()
 
+        nfcItemController = NfcItemController()
+        nfcItemController.setupNfcAdapter(this, this.javaClass)
+
+        updateWeaponUi()
         updateTopUi()
     }
 
     override fun onResume() {
         super.onResume()
+        nfcItemController.onResume(this)
         val subscription = gameManager.observePlayerState()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe {
@@ -104,6 +115,11 @@ class GameLoopActivity : AppCompatActivity() {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe { shoot() }
 
+        val nfcItemPickupSubscription = nfcItemController.observeItemResults().
+                subscribeOn(Schedulers.computation()).
+                observeOn(AndroidSchedulers.mainThread()).
+                subscribe { parseItem(it) }
+
         val respawnScheduler = gameManager.observeRespawnTime()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -117,6 +133,7 @@ class GameLoopActivity : AppCompatActivity() {
         subscriptions.add(subscription)
         subscriptions.add(scanSubscription)
         subscriptions.add(triggersSubscription)
+        subscriptions.add(nfcItemPickupSubscription)
         subscriptions.add(respawnScheduler)
         subscriptions.add(deathEventHandler)
     }
@@ -146,9 +163,29 @@ class GameLoopActivity : AppCompatActivity() {
         }
     }
 
+    fun parseItem(item: NfcItemController.Item) {
+        when (item) {
+            NfcItemController.Item.LASER -> switchToWeapon(Weapon.LASER)
+            NfcItemController.Item.GLOCK -> switchToWeapon(Weapon.GLOCK)
+            NfcItemController.Item.AMMO -> {
+                availableIncremented(AMMO_COUNT)
+                updateWeaponUi()
+                updateTopUi()
+            }
+        }
+    }
+
+    private fun switchToWeapon(newWeapon: Weapon) {
+        weapon = newWeapon
+        count = HudActivity.AMMO_COUNT
+        gunEmpty = false
+        updateWeaponUi()
+        updateTopUi()
+    }
+
     private fun shoot() {
         if (gunEmpty) {
-            soundManager.playSound(SoundManager.EMPTY_POP)
+            soundManager.playSound(weapon.emptySoundId)
             // TODO: animate ammo
             return
         }
@@ -158,22 +195,39 @@ class GameLoopActivity : AppCompatActivity() {
             gunEmpty = true
             scanController.setMode(ScanController.Mode.LOW)
         } else {
-            soundManager.playSound(SoundManager.PISTOL)
+            soundManager.playSound(weapon.shootSoundId)
         }
 
         updateTopUi()
     }
 
     private fun iAmKilled() {
-        soundManager.playSound(SoundManager.DEATH)
+        // TODO Pieter
+//        soundManager.playSound(SoundManager.DEATH)
         deathStateSwitcher.displayedChild = 1
     }
 
+    protected fun updateWeaponUi() {
+        gunImage.setImageResource(weapon.imageId)
+        gunName.text = weapon.name
+        ammoImage.setImageResource(weapon.ammoImageId)
+    }
+
     private fun gunReloaded() {
-        count = AMMO_COUNT
+        if (available <= 0) return
+        soundManager.playSound(weapon.reloadSoundId)
+
+        val deducted = Math.min(available, AMMO_COUNT)
+        available -= deducted
+        count += deducted
+
         gunEmpty = false
         scanController.setMode(ScanController.Mode.HIGH)
         updateTopUi()
+    }
+
+    private fun availableIncremented(inc: Int) {
+        available += inc
     }
 
     private fun ensureRespawning(timeRemaining: Long, event: ShotEvent) {
@@ -195,7 +249,7 @@ class GameLoopActivity : AppCompatActivity() {
     }
 
     fun updateTopUi() {
-        ammoCount.text = "" + count
+        ammoCount.text = count.toString() + " / " + available
         text.visibility = if (gunEmpty) View.VISIBLE else View.GONE
         gunName.visibility = if (gunEmpty) View.GONE else View.VISIBLE
         gunImage.visibility = if (gunEmpty) View.GONE else View.VISIBLE
@@ -204,8 +258,14 @@ class GameLoopActivity : AppCompatActivity() {
     }
 
     override fun onPause() {
+        nfcItemController.onPause(this)
         subscriptions.clear()
         super.onPause()
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        nfcItemController.handleIntent(intent)
     }
 
     inner class ReloadReceiver() : BroadcastReceiver() {
