@@ -31,8 +31,11 @@ class GameLoopActivity : AppCompatActivity() {
     }
 
     val text: TextView by bindView(R.id.info)
-    val ammoCount: TextView by bindView(R.id.ammo_count)
     val recycler: RecyclerView by bindView(R.id.recycler)
+    val gunName: View by bindView(R.id.gun_name)
+    val gunImage: View by bindView(R.id.gun_image)
+    val ammoCount: TextView by bindView(R.id.ammo_count)
+    val ammoImage: View by bindView(R.id.ammo_image)
 
     val reloadReceiver = ReloadReceiver()
     val subscriptions = CompositeSubscription()
@@ -65,18 +68,19 @@ class GameLoopActivity : AppCompatActivity() {
         recycler.itemAnimator = DefaultItemAnimator()
 
         gameManager.gameStarted()
-        scanController = ScanControllerImpl()
-        scanController.onCreate(this)
+        scanController = ScanControllerImpl.getInstance()
 
-        updateAmmoCount()
+        updateTopUi()
     }
 
     override fun onResume() {
         super.onResume()
-        scanController.onResume()
         val subscription = gameManager.observePlayerState()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe { adapter.updateList(it) }
+                .subscribe {
+                    adapter.updateList(it)
+                    if (!gameManager.amIAlive()) iAmKilled()
+                }
         val scanSubscription = scanController.observeScanResults()
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -107,12 +111,11 @@ class GameLoopActivity : AppCompatActivity() {
     private fun respawn() {
         count = AMMO_COUNT
         scanController.setMode(ScanController.Mode.HIGH)
-        updateAmmoCount()
+        updateTopUi()
     }
 
     private fun parseHit(tag: String) {
-        val profile = Profile.getProfileForId(tag)
-        if (profile == null) return
+        val profile = Profile.getProfileForId(tag) ?: return
 
         for (player in gameManager.otherPlayers()) {
             if (player.name == profile.superHeroName) {
@@ -121,7 +124,7 @@ class GameLoopActivity : AppCompatActivity() {
         }
     }
 
-    fun shoot() {
+    private fun shoot() {
         if (gunEmpty) {
             soundManager.playSound(SoundManager.EMPTY_POP)
             // TODO: animate ammo
@@ -136,30 +139,37 @@ class GameLoopActivity : AppCompatActivity() {
             soundManager.playSound(SoundManager.PISTOL)
         }
 
-        updateAmmoCount()
+        updateTopUi()
+    }
+
+    private fun iAmKilled() {
+        // TODO:
+        /*-Sound
+        -UI
+        -Timer => respawn
+        -Block my scanning
+        -After timeout => undo all stuff */
     }
 
     private fun gunReloaded() {
         count = AMMO_COUNT
         gunEmpty = false
         scanController.setMode(ScanController.Mode.HIGH)
-        updateAmmoCount()
+        updateTopUi()
     }
 
-    fun updateAmmoCount() {
+    fun updateTopUi() {
         ammoCount.text = "" + count
         text.visibility = if (gunEmpty) View.VISIBLE else View.GONE
+        gunName.visibility = if (gunEmpty) View.GONE else View.VISIBLE
+        gunImage.visibility = if (gunEmpty) View.GONE else View.VISIBLE
+        ammoCount.visibility = if (gunEmpty) View.GONE else View.VISIBLE
+        ammoImage.visibility = if (gunEmpty) View.GONE else View.VISIBLE
     }
 
     override fun onPause() {
-        scanController.onPause()
         subscriptions.clear()
         super.onPause()
-    }
-
-    override fun onDestroy() {
-        scanController.onDestroy()
-        super.onDestroy()
     }
 
     inner class ReloadReceiver() : BroadcastReceiver() {

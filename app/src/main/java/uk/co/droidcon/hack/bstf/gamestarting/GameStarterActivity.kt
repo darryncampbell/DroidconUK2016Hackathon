@@ -15,13 +15,12 @@ import uk.co.droidcon.hack.bstf.scan.ScanControllerImpl
 
 class GameStarterActivity : AppCompatActivity() {
 
-    internal var scanController: ScanController = ScanControllerImpl()
+    internal var scanController: ScanController = ScanControllerImpl.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_game_starter)
 
-        scanController.onCreate(this)
         scanController.observeScanResults().subscribeOn(Schedulers.computation()).observeOn(AndroidSchedulers.mainThread()).subscribe { code ->
             Timber.d("scan result: %s", code)
             if ("bstf_start_game" == code) {
@@ -33,18 +32,4 @@ class GameStarterActivity : AppCompatActivity() {
 
     }
 
-    override fun onResume() {
-        super.onResume()
-        scanController.onResume()
-    }
-
-    override fun onPause() {
-        scanController.onPause()
-        super.onPause()
-    }
-
-    override fun onDestroy() {
-        scanController.onDestroy()
-        super.onDestroy()
-    }
 }

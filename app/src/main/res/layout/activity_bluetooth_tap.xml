@@ -7,6 +7,12 @@
     android:orientation="vertical"
     tools:context=".BluetoothTapActivity">
 
+    <Button
+        android:id="@+id/clear"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Clear" />
+
     <TextView
         android:id="@+id/text_view"
         android:layout_width="match_parent"
@@ -18,7 +24,8 @@
     <ImageView
         android:id="@+id/start_game_qr"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
+        android:scaleType="fitStart"
         android:src="@drawable/qr_start_game"
         android:visibility="invisible" />
 

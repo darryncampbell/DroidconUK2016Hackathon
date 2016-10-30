@@ -6,13 +6,9 @@ import rx.Observable;
 
 public interface ScanController {
 
-    void onCreate(Context context);
-
-    void onResume();
+    void onResume(Context context);
 
     void onPause();
-
-    void onDestroy();
 
     Observable observeScanTrigger();
 

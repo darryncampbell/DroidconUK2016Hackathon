@@ -52,39 +52,29 @@ open class HudActivity : AppCompatActivity() {
     }
 
     open fun setupScanController() {
-        scanController = ScanControllerImpl()
-        scanController!!.onCreate(this)
-
+        scanController = ScanControllerImpl.getInstance()
         scanController!!.observeScanTrigger().
                 subscribeOn(Schedulers.computation()).
                 observeOn(AndroidSchedulers.mainThread()).
                 subscribe { shoot() }
     }
 
-
     override fun onResume() {
-        scanController?.onResume()
         super.onResume()
     }
 
     override fun onPause() {
-        scanController?.onPause()
         super.onPause()
-    }
-
-    override fun onDestroy() {
-        scanController!!.onDestroy()
-        super.onDestroy()
     }
 
     protected open fun setupShooting() {
         localBroadcastManager = LocalBroadcastManager.getInstance(this)
-        localBroadcastManager!!.registerReceiver(reloadReceiver, IntentFilter(BatteryStateReceiver.ACTION_RELOAD))
+        localBroadcastManager?.registerReceiver(reloadReceiver, IntentFilter(BatteryStateReceiver.ACTION_RELOAD))
     }
 
     protected fun shoot() {
         if (gunEmpty) {
-            soundManager!!.playSound(SoundManager.EMPTY_POP)
+            soundManager?.playSound(SoundManager.EMPTY_POP)
             // TODO: animate ammo
             return
         }
@@ -94,7 +84,7 @@ open class HudActivity : AppCompatActivity() {
             gunEmpty = true
             scanController!!.setMode(ScanController.Mode.OFF)
         } else {
-            soundManager!!.playSound(SoundManager.PISTOL)
+            soundManager?.playSound(SoundManager.PISTOL)
         }
 
         updateUi()
