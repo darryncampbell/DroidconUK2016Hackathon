@@ -141,7 +141,7 @@ open class HudActivity : AppCompatActivity() {
         count--
         if (count <= 0) {
             gunEmpty = true
-            scanController?.setEnabled(false)
+            scanController!!.setMode(ScanController.Mode.OFF)
         } else {
             soundManager?.playSound(weapon.shootSoundId)
         }
@@ -177,7 +177,7 @@ open class HudActivity : AppCompatActivity() {
         count += deducted
 
         gunEmpty = false
-        scanController?.setEnabled(true)
+        scanController?.setMode(ScanController.Mode.HIGH)
         updateTopUi()
     }
 

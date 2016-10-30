@@ -12,7 +12,9 @@ import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.ViewAnimator
 import butterknife.bindView
+import com.bumptech.glide.Glide
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
 import rx.subscriptions.CompositeSubscription
@@ -21,7 +23,9 @@ import uk.co.droidcon.hack.bstf.BstfGameManager
 import uk.co.droidcon.hack.bstf.NfcItemController
 import uk.co.droidcon.hack.bstf.R
 import uk.co.droidcon.hack.bstf.game.HudActivity
+import uk.co.droidcon.hack.bstf.models.Player
 import uk.co.droidcon.hack.bstf.models.Profile
+import uk.co.droidcon.hack.bstf.models.ShotEvent
 import uk.co.droidcon.hack.bstf.models.Weapon
 import uk.co.droidcon.hack.bstf.reload.battery.BatteryStateReceiver
 import uk.co.droidcon.hack.bstf.scan.ScanController
@@ -41,6 +45,18 @@ class GameLoopActivity : AppCompatActivity() {
     val ammoCount: TextView by bindView(R.id.ammo_count)
     val ammoImage: ImageView by bindView(R.id.ammo_image)
 
+    val deathStateSwitcher: ViewAnimator by bindView(R.id.loop_death_switcher)
+    val killedByView: TextView by bindView(R.id.killed_by) // TODO animate if time
+    val killerWhoView: TextView by bindView(R.id.question_mark) // TODO animate if time
+    val killerRevealSwitcher: ViewAnimator by bindView(R.id.killer_reveal)
+    val killerImage: ImageView by bindView(R.id.killer_image)
+
+
+    val reloadReceiver = ReloadReceiver()
+    val subscriptions = CompositeSubscription()
+    val respawnCommand = Runnable { respawn() }
+    val revealKillerCommand = RevealCommand()
+
     var count = AMMO_COUNT
     var available = AMMO_COUNT * 5
     var gunEmpty = false
@@ -48,13 +64,11 @@ class GameLoopActivity : AppCompatActivity() {
 
     lateinit var localBroadcastManager: LocalBroadcastManager
     lateinit var soundManager: SoundManager
+
     lateinit var gameManager: BstfGameManager
     lateinit var adapter: PlayerStateAdapter
     lateinit var scanController: ScanController
     lateinit var nfcItemController: NfcItemController
-
-    val reloadReceiver = ReloadReceiver()
-    val subscriptions = CompositeSubscription()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -106,10 +120,37 @@ class GameLoopActivity : AppCompatActivity() {
                 observeOn(AndroidSchedulers.mainThread()).
                 subscribe { parseItem(it) }
 
+        val respawnScheduler = gameManager.observeRespawnTime()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe { scheduleRespawn(it.second, it.first) }
+
+        val deathEventHandler = gameManager.observeDeathEvent()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe { iAmKilled() }
+
         subscriptions.add(subscription)
         subscriptions.add(scanSubscription)
         subscriptions.add(triggersSubscription)
         subscriptions.add(nfcItemPickupSubscription)
+        subscriptions.add(respawnScheduler)
+        subscriptions.add(deathEventHandler)
+    }
+
+    private fun scheduleRespawn(timeRemaining: Long, event: ShotEvent) {
+        ensureRespawning(timeRemaining, event)
+
+        recycler.removeCallbacks(respawnCommand)
+        scanController.setMode(ScanController.Mode.OFF)
+        recycler.postDelayed(respawnCommand, timeRemaining)
+    }
+
+    private fun respawn() {
+        count = AMMO_COUNT
+        scanController.setMode(ScanController.Mode.HIGH)
+        deathStateSwitcher.displayedChild = 0
+        updateTopUi()
     }
 
     private fun parseHit(tag: String) {
@@ -123,7 +164,7 @@ class GameLoopActivity : AppCompatActivity() {
     }
 
     fun parseItem(item: NfcItemController.Item) {
-        when(item) {
+        when (item) {
             NfcItemController.Item.LASER -> switchToWeapon(Weapon.LASER)
             NfcItemController.Item.GLOCK -> switchToWeapon(Weapon.GLOCK)
             NfcItemController.Item.AMMO -> {
@@ -152,7 +193,7 @@ class GameLoopActivity : AppCompatActivity() {
         count--
         if (count <= 0) {
             gunEmpty = true
-            scanController.setEnabled(false)
+            scanController.setMode(ScanController.Mode.LOW)
         } else {
             soundManager.playSound(weapon.shootSoundId)
         }
@@ -161,12 +202,9 @@ class GameLoopActivity : AppCompatActivity() {
     }
 
     private fun iAmKilled() {
-        // TODO:
-        /*-Sound
-        -UI
-        -Timer => respawn
-        -Block my scanning
-        -After timeout => undo all stuff */
+        // TODO Pieter
+//        soundManager.playSound(SoundManager.DEATH)
+        deathStateSwitcher.displayedChild = 1
     }
 
     protected fun updateWeaponUi() {
@@ -184,12 +222,30 @@ class GameLoopActivity : AppCompatActivity() {
         count += deducted
 
         gunEmpty = false
-        scanController.setEnabled(true)
+        scanController.setMode(ScanController.Mode.HIGH)
         updateTopUi()
     }
 
     private fun availableIncremented(inc: Int) {
         available += inc
+    }
+
+    private fun ensureRespawning(timeRemaining: Long, event: ShotEvent) {
+        revealKillerCommand.killer = event.source
+
+        val timeUntilReveal = timeRemaining - BstfGameManager.RESPAWN_DURATION_MILLIS / 4
+        if (timeUntilReveal < 0) {
+            // Already revealed
+            killerRevealSwitcher.displayedChild = 1
+        } else {
+            killerRevealSwitcher.postDelayed(revealKillerCommand, timeUntilReveal)
+        }
+    }
+
+    private fun revealKiller(killer: Player) {
+        killerRevealSwitcher.displayedChild = 1
+        val profile = Profile.getProfileForName(killer.name)
+        Glide.with(this).load(profile.avatarId).into(killerImage)
     }
 
     fun updateTopUi() {
@@ -216,5 +272,12 @@ class GameLoopActivity : AppCompatActivity() {
         override fun onReceive(context: Context?, intent: Intent?) {
             gunReloaded()
         }
+    }
+
+    inner class RevealCommand(var killer: Player? = null) : Runnable {
+        override fun run() {
+            revealKiller(killer!!)
+        }
+
     }
 }

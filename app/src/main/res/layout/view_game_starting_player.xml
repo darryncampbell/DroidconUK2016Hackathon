@@ -33,8 +33,6 @@
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
         android:layout_marginEnd="8dp"
-        android:src="@drawable/unchecked"
-        android:tint="@color/colorPrimary"
-        android:tintMode="src_atop"/>
+        android:src="@drawable/unchecked"/>
 
 </RelativeLayout>

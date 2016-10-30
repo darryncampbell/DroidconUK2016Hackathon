@@ -29,7 +29,7 @@ public class ScanControllerImpl implements ScanController, EMDKManager.EMDKListe
     private EMDKManager emdkManager;
     private BarcodeManager barcodeManager;
     private Scanner scanner;
-    private boolean scannerEnabled = true;
+    private Mode scannerMode = Mode.HIGH;
 
     private BehaviorSubject scannerTriggerSubject = BehaviorSubject.create();
     private BehaviorSubject<String> scanResultSubject = BehaviorSubject.create();
@@ -50,7 +50,7 @@ public class ScanControllerImpl implements ScanController, EMDKManager.EMDKListe
         } else {
             initBarcodeManager();
             initScanner();
-            setEnabled(scannerEnabled);
+            setMode(Mode.HIGH);
         }
     }
 
@@ -72,11 +72,12 @@ public class ScanControllerImpl implements ScanController, EMDKManager.EMDKListe
     }
 
     @Override
-    public void setEnabled(boolean enabled) {
-        this.scannerEnabled = enabled;
-        Timber.v("setEnabled: %b", enabled);
+    public void setMode(Mode mode) {
+        this.scannerMode = mode;
+        Timber.v("setMode: %s", mode);
+        boolean turnedOn = mode != Mode.OFF;
         try {
-            if (enabled && scanner != null && !scanner.isEnabled()) {
+            if (turnedOn && scanner != null && !scanner.isEnabled()) {
                 scanner.enable();
                 read();
             }
@@ -93,7 +94,7 @@ public class ScanControllerImpl implements ScanController, EMDKManager.EMDKListe
 
         initBarcodeManager();
         initScanner();
-        setEnabled(true);
+        setMode(Mode.HIGH);
     }
 
     private void initBarcodeManager() {
@@ -131,6 +132,8 @@ public class ScanControllerImpl implements ScanController, EMDKManager.EMDKListe
         try {
             final ScannerConfig config = scanner.getConfig();
 
+            // TODO disable scanner shots when Mode == OFF
+
             config.scanParams.decodeHapticFeedback = true;
             config.scanParams.decodeLEDTime = 1000;
             config.scanParams.audioStreamType = ScannerConfig.AudioStreamType.RINGER;
@@ -139,8 +142,10 @@ public class ScanControllerImpl implements ScanController, EMDKManager.EMDKListe
 
             config.readerParams.readerSpecific.imagerSpecific.beamTimer = 300;
             config.readerParams.readerSpecific.laserSpecific.powerMode = ScannerConfig.PowerMode.HIGH;
-            config.readerParams.readerSpecific.imagerSpecific.aimingPattern = scannerEnabled ? ScannerConfig.AimingPattern.ON : ScannerConfig.AimingPattern.OFF;
-            config.readerParams.readerSpecific.imagerSpecific.illuminationMode = scannerEnabled ? ScannerConfig.IlluminationMode.ON : ScannerConfig.IlluminationMode.OFF;
+            config.readerParams.readerSpecific.imagerSpecific.aimingPattern =
+                    scannerMode == Mode.HIGH ? ScannerConfig.AimingPattern.ON : ScannerConfig.AimingPattern.OFF;
+            config.readerParams.readerSpecific.imagerSpecific.illuminationMode =
+                    scannerMode == Mode.HIGH ? ScannerConfig.IlluminationMode.ON : ScannerConfig.IlluminationMode.OFF;
             config.readerParams.readerSpecific.imagerSpecific.illuminationBrightness = 10;
 
             scanner.setConfig(config);
@@ -213,7 +218,9 @@ public class ScanControllerImpl implements ScanController, EMDKManager.EMDKListe
                 read();
                 break;
             case SCANNING:
-                scannerTriggerSubject.onNext(new Object());
+                if (scannerMode != Mode.OFF) {
+                    scannerTriggerSubject.onNext(new Object());
+                }
                 break;
         }
     }
