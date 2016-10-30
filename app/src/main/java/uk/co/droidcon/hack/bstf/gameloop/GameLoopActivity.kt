@@ -77,6 +77,7 @@ class GameLoopActivity : AppCompatActivity() {
         setContentView(R.layout.activity_game_loop)
 
         soundManager = SoundManager.getInstance(this)
+        scanController = ScanControllerImpl.getInstance()
 
         localBroadcastManager = LocalBroadcastManager.getInstance(this)
         localBroadcastManager.registerReceiver(reloadReceiver, IntentFilter(BatteryStateReceiver.ACTION_RELOAD))
