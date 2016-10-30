@@ -6,7 +6,6 @@ import android.content.Intent
 import android.os.BatteryManager
 import android.support.v4.content.LocalBroadcastManager
 import timber.log.Timber
-import uk.co.droidcon.hack.bstf.sounds.SoundManager
 
 class BatteryStateReceiver() : BroadcastReceiver() {
 
@@ -33,7 +32,6 @@ class BatteryStateReceiver() : BroadcastReceiver() {
 
         // TODO: make /*batteryWasLow && level != 0*/ work
         if (Intent.ACTION_BATTERY_OKAY == action ) {
-            SoundManager.getInstance(context).playSound(SoundManager.RELOAD)
             localBroadcastManager!!.sendBroadcast(Intent(ACTION_RELOAD))
             Timber.d("RELOAD!")
             batteryWasLow = false
