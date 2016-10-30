@@ -7,13 +7,9 @@ import android.support.multidex.MultiDexApplication
 import com.google.firebase.database.FirebaseDatabase
 import timber.log.Timber
 import uk.co.droidcon.hack.bstf.reload.battery.BatteryStateReceiver
-import uk.co.droidcon.hack.bstf.scan.ScanController
-import uk.co.droidcon.hack.bstf.scan.ScanControllerImpl
 import uk.co.droidcon.hack.bstf.sounds.SoundManager
 
 class BstfApplication : MultiDexApplication() {
-
-    lateinit var scanController: ScanController
 
     override fun onCreate() {
         super.onCreate()
@@ -31,14 +27,6 @@ class BstfApplication : MultiDexApplication() {
         batteryFilter.addAction(Intent.ACTION_BATTERY_LOW)
         batteryFilter.addAction(Intent.ACTION_BATTERY_CHANGED)
         registerReceiver(BatteryStateReceiver(), batteryFilter)
-
-        scanController = ScanControllerImpl.getInstance()
-        scanController.onResume(this)
-    }
-
-    override fun onTerminate() {
-        scanController.onPause()
-        super.onTerminate()
     }
 
 }
