@@ -18,5 +18,11 @@ public interface ScanController {
 
     Observable<String> observeScanResults();
 
-    void setEnabled(boolean enabled);
+    void setMode(Mode mode);
+
+    enum Mode {
+        HIGH,
+        LOW,
+        OFF
+    }
 }

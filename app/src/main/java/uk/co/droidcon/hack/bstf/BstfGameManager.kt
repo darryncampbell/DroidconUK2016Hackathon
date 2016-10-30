@@ -26,7 +26,7 @@ class BstfGameManager(database: FirebaseDatabase, gameId: Int) : ValueEventListe
     companion object {
         val TAG = BstfGameManager::class.java.simpleName
         val REFERENCE_GAME_SESSIONS = "game_session_"
-        val RESPAWN_DURATION_MILLIS = 20000
+        val RESPAWN_DURATION_MILLIS : Long = 20000
     }
 
     override fun onCancelled(databaseError: DatabaseError?) {

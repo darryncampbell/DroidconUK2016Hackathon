@@ -32,17 +32,17 @@ class GameLoopActivity : AppCompatActivity() {
 
     val text: TextView by bindView(R.id.info)
     val ammoCount: TextView by bindView(R.id.ammo_count)
+    val recycler: RecyclerView by bindView(R.id.recycler)
+
+    val reloadReceiver = ReloadReceiver()
+    val subscriptions = CompositeSubscription()
+    val respawnCommand = Runnable { respawn() }
 
     var count = AMMO_COUNT
     var gunEmpty = false
 
     lateinit var localBroadcastManager: LocalBroadcastManager
     lateinit var soundManager: SoundManager
-    val reloadReceiver = ReloadReceiver()
-
-    val recycler: RecyclerView by bindView(R.id.recycler)
-
-    val subscriptions = CompositeSubscription()
 
     lateinit var gameManager: BstfGameManager
     lateinit var adapter: PlayerStateAdapter
@@ -99,7 +99,15 @@ class GameLoopActivity : AppCompatActivity() {
     }
 
     private fun scheduleRespawn() {
-        scanController.setEnabled(false)
+        recycler.removeCallbacks(respawnCommand)
+        scanController.setMode(ScanController.Mode.OFF)
+        recycler.postDelayed(respawnCommand, BstfGameManager.RESPAWN_DURATION_MILLIS)
+    }
+
+    private fun respawn() {
+        count = AMMO_COUNT
+        scanController.setMode(ScanController.Mode.HIGH)
+        updateAmmoCount()
     }
 
     private fun parseHit(tag: String) {
@@ -123,7 +131,7 @@ class GameLoopActivity : AppCompatActivity() {
         count--
         if (count <= 0) {
             gunEmpty = true
-            scanController.setEnabled(false)
+            scanController.setMode(ScanController.Mode.LOW)
         } else {
             soundManager.playSound(SoundManager.PISTOL)
         }
@@ -134,7 +142,7 @@ class GameLoopActivity : AppCompatActivity() {
     private fun gunReloaded() {
         count = AMMO_COUNT
         gunEmpty = false
-        scanController.setEnabled(true)
+        scanController.setMode(ScanController.Mode.HIGH)
         updateAmmoCount()
     }
 

@@ -33,7 +33,7 @@ public class ScanControllerImpl implements ScanController {
     }
 
     @Override
-    public void setEnabled(boolean enabled) {
+    public void setMode(Mode mode) {
     }
 
 }
