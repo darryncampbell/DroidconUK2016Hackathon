@@ -12,7 +12,7 @@ import uk.co.droidcon.hack.bstf.models.ShotEvent
 import java.util.*
 
 
-class BstfGameManager(database: FirebaseDatabase, gameId: Int) : ValueEventListener {
+class BstfGameManager(database: FirebaseDatabase, gameId: String) : ValueEventListener {
 
     val databaseReference: DatabaseReference
     var gameSession: GameSession
