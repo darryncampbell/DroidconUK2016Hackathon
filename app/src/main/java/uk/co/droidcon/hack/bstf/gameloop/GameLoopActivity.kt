@@ -31,6 +31,7 @@ import uk.co.droidcon.hack.bstf.reload.battery.BatteryStateReceiver
 import uk.co.droidcon.hack.bstf.scan.ScanController
 import uk.co.droidcon.hack.bstf.scan.ScanControllerImpl
 import uk.co.droidcon.hack.bstf.sounds.SoundManager
+import java.util.*
 
 class GameLoopActivity : AppCompatActivity() {
 
@@ -69,6 +70,7 @@ class GameLoopActivity : AppCompatActivity() {
     lateinit var adapter: PlayerStateAdapter
     lateinit var scanController: ScanController
     lateinit var nfcItemController: NfcItemController
+    lateinit var random: Random
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -91,6 +93,8 @@ class GameLoopActivity : AppCompatActivity() {
 
         nfcItemController = NfcItemController()
         nfcItemController.setupNfcAdapter(this, this.javaClass)
+
+        random = Random(1337)
 
         updateWeaponUi()
         updateTopUi()
@@ -202,8 +206,8 @@ class GameLoopActivity : AppCompatActivity() {
     }
 
     private fun iAmKilled() {
-        // TODO Pieter
-//        soundManager.playSound(SoundManager.DEATH)
+        var randomDeathSound = random.nextInt(9) % 2 == 0
+        soundManager.playSound(if (randomDeathSound) soundManager.painSoundId else soundManager.deadSoundId)
         deathStateSwitcher.displayedChild = 1
     }
 
