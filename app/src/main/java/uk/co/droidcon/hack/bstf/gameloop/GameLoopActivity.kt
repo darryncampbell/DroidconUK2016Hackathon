@@ -31,8 +31,8 @@ import uk.co.droidcon.hack.bstf.reload.battery.BatteryStateReceiver
 import uk.co.droidcon.hack.bstf.scan.ScanController
 import uk.co.droidcon.hack.bstf.scan.ScanControllerImpl
 import uk.co.droidcon.hack.bstf.sounds.SoundManager
-import java.util.*
 import java.lang.Math.min
+import java.util.*
 
 class GameLoopActivity : AppCompatActivity() {
 
@@ -78,6 +78,7 @@ class GameLoopActivity : AppCompatActivity() {
         setContentView(R.layout.activity_game_loop)
 
         soundManager = SoundManager.getInstance(this)
+        scanController = ScanControllerImpl.getInstance()
 
         localBroadcastManager = LocalBroadcastManager.getInstance(this)
         localBroadcastManager.registerReceiver(reloadReceiver, IntentFilter(BatteryStateReceiver.ACTION_RELOAD))
