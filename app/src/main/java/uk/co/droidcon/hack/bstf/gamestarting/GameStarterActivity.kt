@@ -34,4 +34,14 @@ class GameStarterActivity : AppCompatActivity() {
 
     }
 
+    override fun onResume() {
+        super.onResume()
+        scanController.onResume(this)
+    }
+
+    override fun onPause() {
+        scanController.onPause()
+        super.onPause()
+    }
+
 }
