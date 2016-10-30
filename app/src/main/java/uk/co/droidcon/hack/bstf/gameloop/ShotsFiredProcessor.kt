@@ -6,15 +6,18 @@ import uk.co.droidcon.hack.bstf.models.Player
 import uk.co.droidcon.hack.bstf.models.ShotEvent
 
 
-fun BstfGameManager.observeMyDeath(): Observable<ShotEvent> =
+fun BstfGameManager.observeDeathState(): Observable<ShotEvent> =
         observeShotsFired()
                 .map { it.lastOrNull() { event -> event.target == me!! } }
                 .filter { it?.isRespawning() ?: false }
                 .map { it!! }
 
+fun BstfGameManager.observeDeathEvent(): Observable<ShotEvent>
+        = observeDeathState().distinctUntilChanged()
 
-fun BstfGameManager.observeRespawnTime(): Observable<Long>
-        = observeMyDeath().map { it.remainingRespawnTime() }
+
+fun BstfGameManager.observeRespawnTime(): Observable<Pair<ShotEvent, Long>>
+        = observeDeathState().map { Pair(it, it.remainingRespawnTime()) }
 
 
 fun BstfGameManager.canShoot(target: Player): Boolean =

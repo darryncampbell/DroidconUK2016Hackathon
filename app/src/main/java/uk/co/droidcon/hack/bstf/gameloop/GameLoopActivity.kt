@@ -10,15 +10,20 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.DefaultItemAnimator
 import android.support.v7.widget.RecyclerView
 import android.view.View
+import android.widget.ImageView
 import android.widget.TextView
+import android.widget.ViewSwitcher
 import butterknife.bindView
+import com.bumptech.glide.Glide
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
 import rx.subscriptions.CompositeSubscription
 import uk.co.droidcon.hack.bstf.BstfComponent
 import uk.co.droidcon.hack.bstf.BstfGameManager
 import uk.co.droidcon.hack.bstf.R
+import uk.co.droidcon.hack.bstf.models.Player
 import uk.co.droidcon.hack.bstf.models.Profile
+import uk.co.droidcon.hack.bstf.models.ShotEvent
 import uk.co.droidcon.hack.bstf.reload.battery.BatteryStateReceiver
 import uk.co.droidcon.hack.bstf.scan.ScanController
 import uk.co.droidcon.hack.bstf.scan.ScanControllerImpl
@@ -37,9 +42,17 @@ class GameLoopActivity : AppCompatActivity() {
     val ammoCount: TextView by bindView(R.id.ammo_count)
     val ammoImage: View by bindView(R.id.ammo_image)
 
+    val deathStateSwitcher: ViewSwitcher by bindView(R.id.loop_death_switcher)
+    val killedByView: TextView by bindView(R.id.killed_by)
+    val killerWhoView: TextView by bindView(R.id.question_mark)
+    val killerRevealSwitcher: ViewSwitcher by bindView(R.id.killer_reveal)
+    val killerImage: ImageView by bindView(R.id.killer_image)
+
+
     val reloadReceiver = ReloadReceiver()
     val subscriptions = CompositeSubscription()
     val respawnCommand = Runnable { respawn() }
+    val revealKillerCommand = RevealCommand()
 
     var count = AMMO_COUNT
     var gunEmpty = false
@@ -94,23 +107,32 @@ class GameLoopActivity : AppCompatActivity() {
         val respawnScheduler = gameManager.observeRespawnTime()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe { scheduleRespawn() }
+                .subscribe { scheduleRespawn(it.second, it.first) }
+
+        val deathEventHandler = gameManager.observeDeathEvent()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe { iAmKilled() }
 
         subscriptions.add(subscription)
         subscriptions.add(scanSubscription)
         subscriptions.add(triggersSubscription)
         subscriptions.add(respawnScheduler)
+        subscriptions.add(deathEventHandler)
     }
 
-    private fun scheduleRespawn() {
+    private fun scheduleRespawn(timeRemaining: Long, event: ShotEvent) {
+        ensureRespawning(timeRemaining, event)
+
         recycler.removeCallbacks(respawnCommand)
         scanController.setMode(ScanController.Mode.OFF)
-        recycler.postDelayed(respawnCommand, BstfGameManager.RESPAWN_DURATION_MILLIS)
+        recycler.postDelayed(respawnCommand, timeRemaining)
     }
 
     private fun respawn() {
         count = AMMO_COUNT
         scanController.setMode(ScanController.Mode.HIGH)
+        deathStateSwitcher.displayedChild = 0
         updateTopUi()
     }
 
@@ -143,12 +165,8 @@ class GameLoopActivity : AppCompatActivity() {
     }
 
     private fun iAmKilled() {
-        // TODO:
-        /*-Sound
-        -UI
-        -Timer => respawn
-        -Block my scanning
-        -After timeout => undo all stuff */
+        soundManager.playSound(SoundManager.DEATH)
+        deathStateSwitcher.displayedChild = 1
     }
 
     private fun gunReloaded() {
@@ -156,6 +174,24 @@ class GameLoopActivity : AppCompatActivity() {
         gunEmpty = false
         scanController.setMode(ScanController.Mode.HIGH)
         updateTopUi()
+    }
+
+    private fun ensureRespawning(timeRemaining: Long, event: ShotEvent) {
+        revealKillerCommand.killer = event.source
+
+        val timeUntilReveal = timeRemaining - BstfGameManager.RESPAWN_DURATION_MILLIS / 4
+        if (timeUntilReveal < 0) {
+            // Already revealed
+            killerRevealSwitcher.displayedChild = 1
+        } else {
+            killerRevealSwitcher.postDelayed(revealKillerCommand, timeUntilReveal)
+        }
+    }
+
+    private fun revealKiller(killer: Player) {
+        killerRevealSwitcher.displayedChild = 1
+        val profile = Profile.getProfileForName(killer.name)
+        Glide.with(this).load(profile.avatarId).into(killerImage)
     }
 
     fun updateTopUi() {
@@ -176,5 +212,12 @@ class GameLoopActivity : AppCompatActivity() {
         override fun onReceive(context: Context?, intent: Intent?) {
             gunReloaded()
         }
+    }
+
+    inner class RevealCommand(var killer: Player? = null) : Runnable {
+        override fun run() {
+            revealKiller(killer!!)
+        }
+
     }
 }
