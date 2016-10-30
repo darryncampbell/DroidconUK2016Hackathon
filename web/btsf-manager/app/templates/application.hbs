@@ -1,19 +1,59 @@
 <div class="container">
     <h1>Blue Scanner Tagon Fire Manager</h1>
 
-    <section>
-        <div>Game Session {{model.id}}</div>
-        <div>Has the game started yet? {{model.started}}</div>
-
-      {{#md-collection content=model.players as |player|}}
-          <div class='collection-item avatar'>
-              <div class="circle green mdi-action-favorite">
-                  <img style="height: 42px" src="{{player.avatarUrl}}" align="middle">
-              </div>
-
-              <p>{{player.name}}</p>
-              <p>is {{#if player.ready}}ready{{else}}not ready{{/if}} to play!</p>
-          </div>
-      {{/md-collection}}
+    <section class="row">
+      {{md-input
+        value=gameSessionId
+        label='Game Session'
+        class="col-md-3"
+        validate=false}}
+        <div class="col-md-3">
+            <div>{{md-btn text='Open Session' action='openSession' class='indigo darken-2'}}</div>
+        </div>
     </section>
+
+
+  {{#if model}}
+      <section>
+          <div class="row" style="margin-bottom: 20px;">
+              <div class="col-md-4">Game Session {{model.id}}</div>
+              <div class="col-md-4">Has the game started yet? {{model.started}}</div>
+              <div class="col-md-4">{{md-btn text='Reset Session' action='stopSession' class='indigo darken-2'}}</div>
+          </div>
+
+          <div class="row">
+              <div class="col-md-6">
+                {{#md-collection content=model.players as |player|}}
+                    <div class='collection-item avatar'>
+                        <div class="circle green mdi-action-favorite">
+                            <img style="height: 42px" src="{{player.avatarUrl}}" align="middle">
+                        </div>
+
+                        <p>{{player.name}}</p>
+                        <p>is {{#if player.ready}}ready{{else}}not ready{{/if}} to play!</p>
+                    </div>
+                {{/md-collection}}
+              </div>
+              <div class="col-md-6">
+                {{#each model.shotsFired as |shotEvent|}}
+                    <div class="row">
+                        <div class="col-md-4">
+                            <img style="height: 42px" src="{{shotEvent.source.avatarUrl}}" align="middle">
+                            <p>{{shotEvent.source.name}}</p>
+                        </div>
+                        <div class="col-md-4">
+                            <img src="images/gun.png" style="height: 48px;">
+                        </div>
+                        <div class="col-md-4">
+                            <img style="height: 42px" src="{{shotEvent.target.avatarUrl}}" align="middle">
+                            <p>{{shotEvent.target.name}}</p>
+                        </div>
+                    </div>
+                {{else}}
+                    <p>No one has been hit yet!</p>
+                {{/each}}
+              </div>
+          </div>
+      </section>
+  {{/if}}
 </div>
