@@ -23,11 +23,9 @@ class GameStarterActivity : AppCompatActivity() {
 
         scanController.observeScanResults().subscribeOn(Schedulers.computation()).observeOn(AndroidSchedulers.mainThread()).subscribe { code ->
             Timber.d("scan result: %s", code)
-            if ("bstf_start_game" == code) {
-                BstfComponent.setBstfGameManager(BstfGameManager(FirebaseDatabase.getInstance(), 1))
-                startActivity(Intent(this@GameStarterActivity, GameStartingActivity::class.java))
-                finish()
-            }
+            BstfComponent.setBstfGameManager(BstfGameManager(FirebaseDatabase.getInstance(), code))
+            startActivity(Intent(this@GameStarterActivity, GameStartingActivity::class.java))
+            finish()
         }
 
     }
