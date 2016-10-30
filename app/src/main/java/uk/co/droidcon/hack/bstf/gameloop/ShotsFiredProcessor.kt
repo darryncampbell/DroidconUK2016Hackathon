@@ -23,7 +23,7 @@ fun BstfGameManager.observeRespawnTime(): Observable<Pair<ShotEvent, Long>>
 fun BstfGameManager.canShoot(target: Player): Boolean =
         gameSession.shotsFired!!
                 .lastOrNull { it.target == target }
-                ?.isRespawning() ?: false
+                ?.isRespawning() ?: true
 
 
 fun BstfGameManager.shoot(target: Player): Boolean {
