@@ -95,7 +95,7 @@ open class HudActivity : AppCompatActivity() {
 
     fun setupNfcItemController() {
         nfcItemController = NfcItemController()
-        nfcItemController?.setupNfcAdapter(this)
+        nfcItemController!!.setupNfcAdapter(this, this.javaClass)
 
         nfcItemController!!.observeItemResults().
                 subscribeOn(Schedulers.computation()).

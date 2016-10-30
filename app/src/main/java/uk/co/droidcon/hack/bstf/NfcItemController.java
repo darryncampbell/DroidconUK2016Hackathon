@@ -17,7 +17,7 @@ public class NfcItemController {
 
     private NfcAdapter nfcAdapter;
     private PendingIntent nfcPendingIntent;
-    private IntentFilter[] geoIntentFilter;
+    private IntentFilter[] ndefTextFilter;
 
     public enum Item {
         LASER,
@@ -27,17 +27,21 @@ public class NfcItemController {
 
     private BehaviorSubject<Item> nfcItemSubject = BehaviorSubject.create();
 
-    public void setupNfcAdapter(@NonNull final Context context) {
+    public void setupNfcAdapter(@NonNull final Context context, Class<?> activityToStart) {
         nfcAdapter = NfcAdapter.getDefaultAdapter(context);
-        nfcPendingIntent = PendingIntent.getActivity(context, 0, new Intent(context, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
+        nfcPendingIntent = PendingIntent.getActivity(context, 0, new Intent(context, activityToStart).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
         final IntentFilter intentFilter = new IntentFilter(NfcAdapter.ACTION_NDEF_DISCOVERED);
-        intentFilter.addDataScheme("text/plain");
-        geoIntentFilter = new IntentFilter[]{intentFilter};
+        try {
+            intentFilter.addDataType("text/plain");
+        } catch (IntentFilter.MalformedMimeTypeException e) {
+            e.printStackTrace();
+        }
+        ndefTextFilter = new IntentFilter[]{intentFilter};
     }
 
     public void onResume(@NonNull Activity activity) {
         if (nfcAdapter != null) {
-            nfcAdapter.enableForegroundDispatch(activity, nfcPendingIntent, geoIntentFilter, null);
+            nfcAdapter.enableForegroundDispatch(activity, nfcPendingIntent, ndefTextFilter, null);
         }
     }
 

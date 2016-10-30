@@ -75,7 +75,7 @@ class GameLoopActivity : AppCompatActivity() {
         scanController = ScanControllerImpl.getInstance()
 
         nfcItemController = NfcItemController()
-        nfcItemController.setupNfcAdapter(this)
+        nfcItemController.setupNfcAdapter(this, this.javaClass)
 
         updateWeaponUi()
         updateTopUi()
