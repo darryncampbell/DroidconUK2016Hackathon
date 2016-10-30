@@ -37,7 +37,7 @@ open class HudActivity : AppCompatActivity() {
     protected var soundManager: SoundManager? = null
     protected val reloadReceiver = ReloadReceiver()
 
-    internal var scanController: ScanController? = null
+    lateinit var scanController: ScanController
     internal var nfcItemController: NfcItemController? = null
 
     val text: TextView by bindView(R.id.info)
@@ -51,7 +51,7 @@ open class HudActivity : AppCompatActivity() {
         setContentView(R.layout.hud)
 
         soundManager = SoundManager.getInstance(this)
-
+        scanController = ScanControllerImpl.getInstance()
         setupScanController()
         setupNfcItemController()
 
@@ -67,8 +67,7 @@ open class HudActivity : AppCompatActivity() {
     }
 
     open fun setupScanController() {
-        scanController = ScanControllerImpl.getInstance()
-        scanController!!.observeScanTrigger().
+        scanController.observeScanTrigger().
                 subscribeOn(Schedulers.computation()).
                 observeOn(AndroidSchedulers.mainThread()).
                 subscribe { shoot() }
@@ -105,11 +104,13 @@ open class HudActivity : AppCompatActivity() {
     }
 
     override fun onResume() {
+        scanController.onResume(this)
         nfcItemController?.onResume(this)
         super.onResume()
     }
 
     override fun onPause() {
+        scanController.onPause()
         nfcItemController?.onPause(this)
         super.onPause()
     }
@@ -141,7 +142,7 @@ open class HudActivity : AppCompatActivity() {
         count--
         if (count <= 0) {
             gunEmpty = true
-            scanController?.setEnabled(false)
+            scanController.setEnabled(false)
         } else {
             soundManager?.playSound(weapon.shootSoundId)
         }
@@ -177,7 +178,7 @@ open class HudActivity : AppCompatActivity() {
         count += deducted
 
         gunEmpty = false
-        scanController?.setEnabled(true)
+        scanController.setEnabled(true)
         updateTopUi()
     }
 

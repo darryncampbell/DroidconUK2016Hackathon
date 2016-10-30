@@ -42,7 +42,7 @@ public class ScanControllerImpl implements ScanController, EMDKManager.EMDKListe
     public void onResume(Context context) {
         Timber.v("onResume: %s, %s", emdkManager, barcodeManager);
         if (emdkManager == null) {
-            final EMDKResults results = EMDKManager.getEMDKManager(context, this);
+            final EMDKResults results = EMDKManager.getEMDKManager(context.getApplicationContext(), this);
             Timber.v("onResume: %s", results.statusCode.name());
             if (results.statusCode != EMDKResults.STATUS_CODE.SUCCESS) {
                 throw new RuntimeException();

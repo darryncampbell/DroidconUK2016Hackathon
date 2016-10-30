@@ -84,6 +84,7 @@ class GameLoopActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        scanController.onResume(this)
         nfcItemController.onResume(this)
         val subscription = gameManager.observePlayerState()
                 .observeOn(AndroidSchedulers.mainThread())
@@ -203,6 +204,7 @@ class GameLoopActivity : AppCompatActivity() {
 
     override fun onPause() {
         nfcItemController.onPause(this)
+        scanController.onPause()
         subscriptions.clear()
         super.onPause()
     }
