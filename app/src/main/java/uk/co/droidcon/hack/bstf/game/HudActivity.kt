@@ -92,7 +92,7 @@ open class HudActivity : AppCompatActivity() {
         count--
         if (count <= 0) {
             gunEmpty = true
-            scanController!!.setMode(false)
+            scanController!!.setMode(ScanController.Mode.OFF)
         } else {
             soundManager!!.playSound(SoundManager.PISTOL)
         }
@@ -109,7 +109,7 @@ open class HudActivity : AppCompatActivity() {
         count = AMMO_COUNT
         gunEmpty = false
         if (scanController != null) {
-            scanController!!.setMode(true)
+            scanController!!.setMode(ScanController.Mode.HIGH)
         }
         updateUi()
     }
