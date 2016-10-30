@@ -10,7 +10,7 @@ import uk.co.droidcon.hack.bstf.R;
 
 public enum Weapon {
     GLOCK(R.drawable.glock, R.drawable.ammo, "Glock", R.raw.pistol, R.raw.emptypop, R.raw.reload2),
-    LASER(R.drawable.laser, R.drawable.laser_ammo, "Laser", R.raw.laser, R.raw.emptypop, R.raw.laser_reload);
+    LASER(R.drawable.laser, R.drawable.laser_ammo, "Laser", R.raw.laser, R.raw.laser_empty, R.raw.laser_reload);
 
     Weapon(@DrawableRes int imageId, @DrawableRes int ammoImageId, String name, @RawRes int shootSoundResId, @RawRes int emptySoundResId, @RawRes int reloadSoundResId) {
         this.imageId = imageId;
