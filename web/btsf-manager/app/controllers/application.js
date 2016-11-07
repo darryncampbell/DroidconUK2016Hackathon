@@ -66,7 +66,7 @@ export default Ember.Controller.extend({
   },
 
   sortAndFilterEvents: function (shotsFired) {
-    if (shotsFired.length ==0) return shotsFired;
+    if (shotsFired.length == 0) return shotsFired;
     return Ember.A(shotsFired.toArray().reverse());
   },
 
